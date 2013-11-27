@@ -6,12 +6,7 @@ use warnings;
 use utf8;
 use Roman;
 
-#!/usr/bin/perl
-
-use strict;
-use warnings;
 use DBI;
-use JSON;
 use Encode;
 use File::Temp;
 
@@ -31,22 +26,22 @@ my $password = '';
 my $dbh = DBI->connect("DBI:mysql:$db_name:$host;mysql_local_infile=1", $login, $password, {RaiseError => 1, PrintError => 0, mysql_enable_utf8 => 1}) || die "$DBI::err($DBI::errstr)\n";
 
 $dbh->do('DROP TABLE IF EXISTS `dic_lingvo_basic`') if $clean;
-$dbh->do('CREATE TABLE IF NOT EXISTS `dic_lingvo_basic` (
+$dbh->do('CREATE TABLE `dic_lingvo_basic` (
             `keyword_id` int(11) NOT NULL AUTO_INCREMENT,
             `keyword` char(128) DEFAULT NULL,
+            `variant` int(11) DEFAULT NULL,
             `source` char(2) DEFAULT NULL,
             `target` char(2) DEFAULT NULL,
             `dictionary` char(64) DEFAULT NULL,
             PRIMARY KEY (`keyword_id`),
             KEY `keyword` (`keyword`)
-          ) DEFAULT CHARSET=utf8'
+          ) ENGINE=MyISAM DEFAULT CHARSET=utf8'
 );
 
 $dbh->do('DROP TABLE IF EXISTS `dic_lingvo_col`') if $clean;
 $dbh->do('CREATE TABLE IF NOT EXISTS `dic_lingvo_col` (
             `col_id` int(11) NOT NULL AUTO_INCREMENT,
             `group_id` int(11) DEFAULT NULL,
-            `num` int(11) DEFAULT NULL,
             `collocation` char(128) DEFAULT NULL,
             PRIMARY KEY (`col_id`),
             KEY `group_id` (`group_id`),
@@ -65,14 +60,16 @@ $dbh->do('CREATE TABLE IF NOT EXISTS `dic_lingvo_ex` (
 );
 
 $dbh->do('DROP TABLE IF EXISTS `dic_lingvo_group`') if $clean;
-$dbh->do('CREATE TABLE IF NOT EXISTS `dic_lingvo_group` (
+$dbh->do('CREATE TABLE `dic_lingvo_group` (
             `group_id` int(11) NOT NULL AUTO_INCREMENT,
             `keyword_id` int(11) DEFAULT NULL,
-            `level` int(11) DEFAULT NULL,
-            `number` char(3) DEFAULT NULL,
+            `type` char(32) DEFAULT NULL,
+            `record_num` int(3) DEFAULT NULL,
+            `transcription` char(128) DEFAULT NULL,
+            `translation` char(128) DEFAULT NULL,
             PRIMARY KEY (`group_id`),
             KEY `keyword_id` (`keyword_id`)
-          )  DEFAULT CHARSET=utf8'
+          ) ENGINE=MyISAM DEFAULT CHARSET=utf8'
 );
 
 $dbh->do('DROP TABLE IF EXISTS `dic_lingvo_syn`') if $clean;
@@ -86,36 +83,11 @@ $dbh->do('CREATE TABLE IF NOT EXISTS `dic_lingvo_syn` (
           ) DEFAULT CHARSET=utf8'
 );
 
-$dbh->do('DROP TABLE IF EXISTS `dic_lingvo_trn`') if $clean;
-$dbh->do('CREATE TABLE IF NOT EXISTS `dic_lingvo_trn` (
-            `trn_id` int(11) NOT NULL AUTO_INCREMENT,
-            `keyword_id` int(11) DEFAULT NULL,
-            `group_id` int(11) DEFAULT NULL,
-            `translation` char(128) DEFAULT NULL,
-            PRIMARY KEY (`trn_id`),
-            KEY `keyword_id` (`keyword_id`),
-            KEY `group_id` (`group_id`),
-            KEY `translation` (`translation`)
-          ) DEFAULT CHARSET=utf8'
-);
-
-$dbh->do('DROP TABLE IF EXISTS `dic_lingvo_trp`') if $clean;
-$dbh->do('CREATE TABLE IF NOT EXISTS `dic_lingvo_trp` (
-            `trp_id` int(11) NOT NULL AUTO_INCREMENT,
-            `group_id` int(11) DEFAULT NULL,
-            `transcription` char(128) DEFAULT NULL,
-            PRIMARY KEY (`trp_id`),
-            KEY `group_id` (`group_id`)
-          ) DEFAULT CHARSET=utf8'
-);
-
 my $load_basic = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_lingvo_basic` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
 my $load_col = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_lingvo_col` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
 my $load_ex = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_lingvo_ex` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
 my $load_group = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_lingvo_group` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
 my $load_syn = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_lingvo_syn` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
-my $load_trn = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_lingvo_trn` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
-my $load_trp = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_lingvo_trp` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
 
 my $query = $dbh->prepare(q/SELECT id, keyword, definition FROM source_lingvo WHERE dictionary = ? ORDER BY id/);
 
@@ -125,17 +97,12 @@ my $col_id = ($dbh->selectrow_array(q/SELECT MAX(col_id) FROM dic_lingvo_col/))[
 my $ex_id = ($dbh->selectrow_array(q/SELECT MAX(ex_id) FROM dic_lingvo_ex/))[0];
 my $group_id = ($dbh->selectrow_array(q/SELECT MAX(group_id) FROM dic_lingvo_group/))[0];
 my $syn_id = ($dbh->selectrow_array(q/SELECT MAX(syn_id) FROM dic_lingvo_syn/))[0];
-my $trn_id = ($dbh->selectrow_array(q/SELECT MAX(trn_id) FROM dic_lingvo_trn/))[0];
-my $trp_id = ($dbh->selectrow_array(q/SELECT MAX(trp_id) FROM dic_lingvo_trp/))[0];
 
 $keyword_id ||= 0;
 $col_id ||= 0;
 $ex_id ||= 0;
 $group_id ||= 0;
 $syn_id ||= 0;
-$trn_id ||= 0;
-$trp_id ||= 0;
-
 
 my $tmp1 = File::Temp->new();
 my $tmp2 = File::Temp->new();
@@ -149,6 +116,81 @@ open(LOG, ">log.txt") || die;
 $query->execute($dic_source_name);
 while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
     print  $id, "\n";
+    my @strings = split(/\n/, $data);
+    
+    (shift @strings) =~ m/<k>(.*)<\/k>/;
+    die "ERROR: keyword_id $id - no keyword\n" if $1 ne $keyword;
+    
+    my %trn = ();
+    my $variant = 0; # I II III IV V
+    my $type = 0;    # 1. 2. 3. 4. 5. (сущ. прил. гл.)
+    my $record = 0;  # 1) 2) 3) 4) 5)
+    my $transcription;
+    my $translation;
+    
+    for (my $i = 0; $i < @strings; $i++) {
+        if ($strings[$i] =~ m/^•/) {
+            # code for collocation
+        }        
+        
+        # transcription
+        $transcription = $1 if $strings[$i] =~ m/<tr>(.+?)<\/tr>/;
+        
+        # record number
+        $record = $1 if $strings[$i] =~ m/^(\d+)\)/;
+        
+        # translation
+        push @{$trn{$variant}{$type}{$record}}, {trn => $1, tr => $transcription ? $transcription : '\N'} if $strings[$i] =~ m/<dtrn>(.+?)<\/dtrn>/;
+        
+        # synonyms
+        if ($i + 1 < @strings && $strings[$i] =~ m/^<b>Syn:<\/b>/) {
+            my @syn = ();
+            while ($strings[$i + 1] =~ m/<kref>([^<>]+)<\/kref>/g) {
+               push @syn, $1; 
+            }
+            if (@{$trn{$variant}{$type}{$record}}) {
+                my $last_rec = @{$trn{$variant}{$type}{$record}}[-1];
+                $$last_rec{syn} = \@syn;
+            } else {
+                die "ERROR: keyword_id $id (string $i) - no record for synonyms\n"
+            }
+        }
+        
+        # examples
+        if ($i + 1 < @strings && $strings[$i] =~ m/^<ex>([^<>]+)<\/ex>/) {
+            my $last_rec = @{$trn{$variant}{$type}{$record}}[-1];
+            push @{$$last_rec{ex}}, $1;
+        }
+        
+        # variant
+        if ($strings[$i] =~ m/^<b>([IVX]+)<\/b> *(?:<abr>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/abr>)?/) {
+            $variant = arabic($1);
+            if ($2) {
+               $type = $2;
+            } else {
+                if ($i + 1 < @strings && $strings[$i + 1] =~ m/^<abr>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/abr>/) {
+                    $type = $1;
+                } else {
+                    die "ERROR: keyword_id $id (string $i) - no type\n"
+                }
+            }
+        }
+        
+        # part of speech
+        if ($strings[$i] =~ m/<b>\d+\.<\/b> *(?:<abr>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/abr>)?/) {
+            $type = $1;
+            if ($2) {
+               $type = $2;
+            } else {
+                if ($i + 1 < @strings && $strings[$i + 1] =~ m/^<abr>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/abr>/) {
+                    $type = $1;
+                } else {
+                    die "ERROR: keyword_id $id (string $i) - no type\n"
+                }
+            }
+        }
+    }
+    
     
     $data =~ s/<b>1\.<\/b> *([^\n]+)//sg;
     $hash{$1}++ if $1;
@@ -157,6 +199,8 @@ map {print LOG $_, "\t", $hash{$_}, "\n"} keys %hash;
 
 
 __END__
+
+
 my $sss = '<abr><i><c><co>сущ.</co></c></i></abr>';
 
 my $arabic = 15;
@@ -164,7 +208,7 @@ my $roman = 'IX';
 $roman = roman($arabic);                        # convert to roman numerals
 $arabic = arabic($roman) if isroman($roman);    # convert from roman numerals
 
-$sss =~ m/.*(<(.*?)>.*(<\/\2>))/;
+$sss =~ m/.*(<(.*?)>.*?<(\/\2)>)/;
 my $ss = $&;
 my $ee = $1;
 my $gg = $2;
