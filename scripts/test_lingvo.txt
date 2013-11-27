@@ -1,0 +1,55 @@
+19624	LingvoUniversalEnRu_2.4.2	desert	<k>desert</k>\
+<b>I</b>\
+<b>1.</b> <tr>ˈdezət</tr> \
+<abr><i><c><co>сущ.</co></c></i></abr>\
+1) <dtrn>пустыня; пустынный район</dtrn>\
+<ex>an arid desert — безводная пустыня</ex>\
+<ex>trackless desert — безжизненная пустыня</ex>\
+- <kref>cultural desert</kref>\
+- <kref>reclaim a desert</kref>\
+<b>Syn:</b>\
+<kref>plain</kref>, <kref>waste</kref>, <kref>wilderness</kref>\
+2) <dtrn><co>(<i>непривлекательная сфера деятельности</i>)</co></dtrn>\
+<ex>lost in a desert of doubt — затерявшийся в пучине сомнений</ex>\
+<b>2.</b> <tr>ˈdezət</tr> \
+<abr><i><c><co>прил.</co></c></i></abr>\
+1) <dtrn>заброшенный, покинутый</dtrn>\
+<b>Syn:</b>\
+<kref>forsaken</kref>, <kref>abandoned</kref>\
+2) <dtrn>необитаемый, безлюдный</dtrn>\
+<ex>a desert island — необитаемый остров</ex>\
+<ex>He fell asleep in a desert wood. — Он заснул в глухом необитаемом лесу.</ex>\
+<b>Syn:</b>\
+<kref>uninhabited</kref>, <co>unpeopled</co>, <kref>desolate</kref>, <kref>lonely</kref>\
+3) <dtrn>бесплодная, неплодородная <co>(<i>земля, почва</i>)</co></dtrn>\
+<b>Syn:</b>\
+<kref>uncultivated</kref>, <kref>unproductive</kref>, <kref>sterile</kref>, <kref>barren</kref>\
+4) <dtrn><abr><i><c><co>поэт.</co></c></i></abr> сухой, невыразительный</dtrn>\
+<ex>desert authors — скучные авторы, невыразительные писатели</ex>\
+<b>3.</b> <tr>dɪˈzət</tr>\
+<abr><i><c><co>гл.</co></c></i></abr>\
+1) <dtrn>покидать <co>(<i>территорию или человека</i>)</co>, оставлять; бросать <co>(<i>семью</i>)</co>; сдавать, оставлять <co>(<i>территорию</i>)</co></dtrn>\
+<ex>to desert the stage for Hollywood — оставить сцену ради Голливуда</ex>\
+<ex>In the presence of Socrates, his thoughts seem to desert him. — Казалось, что в присутствии Сократа его мысли покидали его.</ex>\
+<b>Syn:</b>\
+<kref>abandon</kref>, <kref>forsake</kref>, <kref>relinquish</kref>, <kref>give up</kref>\
+2) <dtrn><abr><i><c><co>воен.</co></c></i></abr> дезертировать; покинуть пост, оставить вахту <co>(<i>без разрешения</i>)</co></dtrn>\
+<ex>he deserted from his regiment — он дезертировал из полка</ex>\
+<ex>to desert to the enemy — перебежать во вражеский стан</ex>\
+<ex>He deserted in the midst of the battle. — Он дезертировал в самый разгар битвы.</ex>\
+3)\
+а) <dtrn><c><co><abr><i>полит.</i></abr>, <abr><i>шотл.</i></abr></co></c> объявить перерыв в работе</dtrn>\
+б) <dtrn>потерять юридическую силу, перестать быть действенным</dtrn>\
+<b>II</b> <tr>dɪˈzət</tr>\
+<abr><i><c><co>сущ.</co></c></i></abr>\
+1) <dtrn>достоинство, преимущество</dtrn>\
+<ex>I visited him as a man of desert. — Я пришел к нему как к достойному человеку.</ex>\
+<b>Syn:</b>\
+<co>meritoriousness</co>, <kref>excellence</kref>, <kref>worth</kref>\
+2)\
+а) <dtrn>хороший или дурной поступок <co>(<i>обычно заслуживающий награды или наказания</i>)</co></dtrn>\
+<ex>to do to each according to his deserts — воздать каждому по его заслугам</ex>\
+б) <dtrn><i><c><co><abr>обыкн.</abr> <abr>мн.</abr></co></c></i> то, что заслужено <co>(<i>награда или наказание</i>)</co></dtrn>\
+<ex>He has got his deserts. — Он получил то, что ему причиталось.</ex>\
+<b>Syn:</b>\
+<kref>reward</kref>, <kref>punishment</kref>
