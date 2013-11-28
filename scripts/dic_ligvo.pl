@@ -11,11 +11,11 @@ use Encode;
 use File::Temp;
 
 ###################################
-#my $dic_source_name = 'LingvoUniversalEnRu_2.4.2';
-my $dic_source_name = 'LingvoUniversalRuEn_2.4.2';
-my $sorce = 'ru';
-my $target = 'en';
-my $clean = 1; # DROP TABLE source : 1 = yes, 0 = no
+my $dic_source_name = 'LingvoUniversalEnRu_2.4.2';
+#my $dic_source_name = 'LingvoUniversalRuEn_2.4.2';
+my $sorce = 'en';
+my $target = 'ru';
+my $clean = 0; # DROP TABLE source : 1 = yes, 0 = no
 
 my $db_name = 'Dictionary';
 my $host = 'localhost';
@@ -26,7 +26,7 @@ my $password = '';
 my $dbh = DBI->connect("DBI:mysql:$db_name:$host;mysql_local_infile=1", $login, $password, {RaiseError => 1, PrintError => 0, mysql_enable_utf8 => 1}) || die "$DBI::err($DBI::errstr)\n";
 
 $dbh->do('DROP TABLE IF EXISTS `dic_lingvo_basic`') if $clean;
-$dbh->do('CREATE TABLE `dic_lingvo_basic` (
+$dbh->do('CREATE TABLE IF NOT EXISTS `dic_lingvo_basic` (
             `keyword_id` int(11) NOT NULL AUTO_INCREMENT,
             `keyword` char(128) DEFAULT NULL,
             `variant` int(11) DEFAULT NULL,
@@ -60,7 +60,7 @@ $dbh->do('CREATE TABLE IF NOT EXISTS `dic_lingvo_ex` (
 );
 
 $dbh->do('DROP TABLE IF EXISTS `dic_lingvo_group`') if $clean;
-$dbh->do('CREATE TABLE `dic_lingvo_group` (
+$dbh->do('CREATE TABLE IF NOT EXISTS `dic_lingvo_group` (
             `group_id` int(11) NOT NULL AUTO_INCREMENT,
             `keyword_id` int(11) DEFAULT NULL,
             `type` char(32) DEFAULT NULL,
@@ -104,15 +104,15 @@ $ex_id ||= 0;
 $group_id ||= 0;
 $syn_id ||= 0;
 
-my $tmp1 = File::Temp->new();
-my $tmp2 = File::Temp->new();
-my $tmp3 = File::Temp->new();
-binmode($tmp1, ":encoding(utf8)");
-binmode($tmp2, ":encoding(utf8)");
-binmode($tmp3, ":encoding(utf8)");
+#my $tmp1 = File::Temp->new();
+#my $tmp2 = File::Temp->new();
+#my $tmp3 = File::Temp->new();
+#binmode($tmp1, ":encoding(utf8)");
+#binmode($tmp2, ":encoding(utf8)");
+#binmode($tmp3, ":encoding(utf8)");
 
 my %hash = ();
-open(LOG, ">log.txt") || die;
+#open(LOG, ">log.txt") || die;
 $query->execute($dic_source_name);
 while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
     print  $id, "\n";
@@ -123,52 +123,31 @@ while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
     
     my %trn = ();
     my $variant = 0; # I II III IV V
-    my $type = 0;    # 1. 2. 3. 4. 5. (сущ. прил. гл.)
+    my $type;        # 1. 2. 3. 4. 5. (сущ. прил. гл.)
     my $record = 0;  # 1) 2) 3) 4) 5)
     my $transcription;
     my $translation;
     
     for (my $i = 0; $i < @strings; $i++) {
+        # collocation
         if ($strings[$i] =~ m/^•/) {
-            # code for collocation
+            for (; $i < @strings; $i++) {
+                last if $strings[$i] =~ m/^<b>(?:[IVX]+|d+[.)])<\/b>/;
+                
+                # code to extract collocations
+                
+            }
+            last unless $i + 1 < @strings; 
         }        
         
-        # transcription
-        $transcription = $1 if $strings[$i] =~ m/<tr>(.+?)<\/tr>/;
-        
-        # record number
-        $record = $1 if $strings[$i] =~ m/^(\d+)\)/;
-        
-        # translation
-        push @{$trn{$variant}{$type}{$record}}, {trn => $1, tr => $transcription ? $transcription : '\N'} if $strings[$i] =~ m/<dtrn>(.+?)<\/dtrn>/;
-        
-        # synonyms
-        if ($i + 1 < @strings && $strings[$i] =~ m/^<b>Syn:<\/b>/) {
-            my @syn = ();
-            while ($strings[$i + 1] =~ m/<kref>([^<>]+)<\/kref>/g) {
-               push @syn, $1; 
-            }
-            if (@{$trn{$variant}{$type}{$record}}) {
-                my $last_rec = @{$trn{$variant}{$type}{$record}}[-1];
-                $$last_rec{syn} = \@syn;
-            } else {
-                die "ERROR: keyword_id $id (string $i) - no record for synonyms\n"
-            }
-        }
-        
-        # examples
-        if ($i + 1 < @strings && $strings[$i] =~ m/^<ex>([^<>]+)<\/ex>/) {
-            my $last_rec = @{$trn{$variant}{$type}{$record}}[-1];
-            push @{$$last_rec{ex}}, $1;
-        }
-        
         # variant
-        if ($strings[$i] =~ m/^<b>([IVX]+)<\/b> *(?:<abr>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/abr>)?/) {
+        if ($strings[$i] =~ m/^<b>([IVX]+)<\/b> *(?:(?:<[^<>]+>)*<abr>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/abr>)?/) {
             $variant = arabic($1);
+            # part of speech
             if ($2) {
                $type = $2;
             } else {
-                if ($i + 1 < @strings && $strings[$i + 1] =~ m/^<abr>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/abr>/) {
+                if ($i + 1 < @strings && $strings[$i + 1] =~ m/^(?:<[^<>]+>)*<abr>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/abr>/) {
                     $type = $1;
                 } else {
                     die "ERROR: keyword_id $id (string $i) - no type\n"
@@ -177,26 +156,70 @@ while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
         }
         
         # part of speech
-        if ($strings[$i] =~ m/<b>\d+\.<\/b> *(?:<abr>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/abr>)?/) {
-            $type = $1;
-            if ($2) {
-               $type = $2;
+        if ($strings[$i] =~ m/<b>\d+\.<\/b> *(?:(?:<[^<>]+>)*<abr>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/abr>)?/) {
+            if ($1) {
+               $type = $1;
             } else {
-                if ($i + 1 < @strings && $strings[$i + 1] =~ m/^<abr>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/abr>/) {
+                if ($i + 1 < @strings && $strings[$i + 1] =~ m/^(?:<[^<>]+>)*<abr>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/abr>/) {
                     $type = $1;
                 } else {
                     die "ERROR: keyword_id $id (string $i) - no type\n"
                 }
             }
         }
+        
+        # transcription
+        if ($strings[$i] =~ m/^<tr>(.+?)<\/tr>/) {
+            $transcription = $1;
+            # part of speech
+            if ($i + 1 < @strings && $strings[$i + 1] =~ m/^(?:<[^<>]+>)*<abr>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/abr>/) {
+                $type = $1;
+            }
+        } elsif ($strings[$i] =~ m/<tr>(.+?)<\/tr>/) {
+            $transcription = $1;
+        }
+        
+        # record number
+        $record = $1 if $strings[$i] =~ m/^(\d+)\)/;
+        
+        # translation
+        if ($strings[$i] =~ m/<dtrn>(.+?)<\/dtrn>/ ||
+            $strings[$i] =~ m/(?:<[^<>]+>)* *= *<kref>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/kref>/) {
+            $transcription ||= '\N';
+            $type ||= '\N';
+            push @{$trn{$variant}}, {trn => $1, tr => $transcription, num => $record, type => $type};
+        }
+        
+        # synonyms
+        if ($i + 1 < @strings && $strings[$i] =~ m/^<b>Syn:<\/b>/) {
+            my @syn = ();
+            while ($strings[$i + 1] =~ m/<kref>([^<>]+)<\/kref>/g) {
+               push @syn, $1; 
+            }
+            if (exists $trn{$variant} && @{$trn{$variant}}) {
+                my $last_rec = @{$trn{$variant}}[-1];
+                $$last_rec{syn} = \@syn;
+            } else {
+                die "ERROR: keyword_id $id (string $i) - no record for synonyms\n"
+            }
+        }
+        
+        # examples
+        if ($strings[$i] =~ m/^<ex>([^<>]+)<\/ex>/) {
+            if (exists $trn{$variant} && @{$trn{$variant}}) {
+                my $last_rec = @{$trn{$variant}}[-1];
+                push @{$$last_rec{ex}}, $1;
+            } else {
+                die "ERROR: keyword_id $id (string $i) - no record for examples\n"
+            }
+        }
     }
     
     
-    $data =~ s/<b>1\.<\/b> *([^\n]+)//sg;
-    $hash{$1}++ if $1;
+    1;
 }
-map {print LOG $_, "\t", $hash{$_}, "\n"} keys %hash;
 
+1;
 
 __END__
 
