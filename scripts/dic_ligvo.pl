@@ -15,7 +15,7 @@ my $dic_source_name = 'LingvoUniversalEnRu_2.4.2';
 #my $dic_source_name = 'LingvoUniversalRuEn_2.4.2';
 my $sorce = 'en';
 my $target = 'ru';
-my $clean = 0; # DROP TABLE source : 1 = yes, 0 = no
+my $clean = 1; # DROP TABLE source : 1 = yes, 0 = no
 
 my $db_name = 'Dictionary';
 my $host = 'localhost';
@@ -53,7 +53,7 @@ $dbh->do('DROP TABLE IF EXISTS `dic_lingvo_ex`') if $clean;
 $dbh->do('CREATE TABLE IF NOT EXISTS `dic_lingvo_ex` (
             `ex_id` int(11) NOT NULL AUTO_INCREMENT,
             `group_id` int(11) DEFAULT NULL,
-            `example` char(128) DEFAULT NULL,
+            `example` text,
             PRIMARY KEY (`ex_id`),
             KEY `group_id` (`group_id`)
           ) DEFAULT CHARSET=utf8'
@@ -83,11 +83,11 @@ $dbh->do('CREATE TABLE IF NOT EXISTS `dic_lingvo_syn` (
           ) DEFAULT CHARSET=utf8'
 );
 
-my $load_basic = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_lingvo_basic` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
-my $load_col = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_lingvo_col` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
-my $load_ex = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_lingvo_ex` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
-my $load_group = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_lingvo_group` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
-my $load_syn = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_lingvo_syn` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
+my $load_basic = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_lingvo_basic` CHARACTER SET UTF8/);
+my $load_col = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_lingvo_col` CHARACTER SET UTF8/);
+my $load_ex = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_lingvo_ex` CHARACTER SET UTF8/);
+my $load_group = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_lingvo_group` CHARACTER SET UTF8/);
+my $load_syn = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_lingvo_syn` CHARACTER SET UTF8/);
 
 my $query = $dbh->prepare(q/SELECT id, keyword, definition FROM source_lingvo WHERE dictionary = ? ORDER BY id/);
 
@@ -104,24 +104,28 @@ $ex_id ||= 0;
 $group_id ||= 0;
 $syn_id ||= 0;
 
-#my $tmp1 = File::Temp->new();
-#my $tmp2 = File::Temp->new();
-#my $tmp3 = File::Temp->new();
-#binmode($tmp1, ":encoding(utf8)");
-#binmode($tmp2, ":encoding(utf8)");
-#binmode($tmp3, ":encoding(utf8)");
+my $tmp_basic = File::Temp->new();
+my $tmp_group = File::Temp->new();
+my $tmp_syn   = File::Temp->new();
+my $tmp_ex    = File::Temp->new();
+my $tmp_col   = File::Temp->new();
+binmode($tmp_basic, ":encoding(utf8)");
+binmode($tmp_group, ":encoding(utf8)");
+binmode($tmp_syn, ":encoding(utf8)");
+binmode($tmp_ex, ":encoding(utf8)");
+binmode($tmp_col, ":encoding(utf8)");
 
-my %hash = ();
-#open(LOG, ">log.txt") || die;
+open(LOG, ">log.txt") || die;
+binmode(LOG, ":encoding(utf8)");
 $query->execute($dic_source_name);
 while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
     print  $id, "\n";
     my @strings = split(/\n/, $data);
     
     (shift @strings) =~ m/<k>(.*)<\/k>/;
-    if ($id == 929) {
-        1;
-    }
+    #if ($id == 929) {
+    #    1;
+    #}
     
     my %trn = ();
     my $variant = 0; # I II III IV V
@@ -136,21 +140,14 @@ while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
             $type = rm_tag($1);
         }
         
-        # collocation
-        if ($strings[$i] =~ m/^•/) {
-            for (; $i < @strings; $i++) {
-                last if $strings[$i] =~ m/^<b>(?:[IVX]+|d+[.)])<\/b>/;
-                
-                # code to extract collocations
-                
-            }
-            last unless $i + 1 < @strings; 
-        } elsif ($strings[$i] =~ m/^- *(<.*>)/) {
+        # collocation        
+        if ($strings[$i] =~ m/^- *(<.*>)/) {
             if (exists $trn{$variant} && @{$trn{$variant}}) {
                 my $last_rec = @{$trn{$variant}}[-1];
                 push @{$$last_rec{col}}, $1;
             } else {
-                1;#die "ERROR: keyword_id $id (string $i) - no record for collocation\n"
+                print LOG $keyword, "\tno record for collocation\n";
+                #die "ERROR: keyword_id $id (string $i) - no record for collocation\n"
             }
         }
         
@@ -166,7 +163,8 @@ while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
                 if ($i + 1 < @strings && $strings[$i + 1] =~ m/^(<.*>)/) {
                     $type = rm_tag($1) if $strings[$i + 1] !~ m/^<b>|<tr>|<dtrn>|<ex>|<iref>/;
                 } else {
-                    1;#die "ERROR: keyword_id $id (string $i) - no type\n"
+                    print LOG $keyword, "\tno type\n";
+                    #die "ERROR: keyword_id $id (string $i) - no type\n"
                 }
             }
         }
@@ -181,7 +179,8 @@ while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
                 if ($i + 1 < @strings && $strings[$i + 1] =~ m/^(<.*>)/ && $strings[$i + 1] !~ m/^<b>|<tr>|<dtrn>|<ex>|<iref>/) {
                     $type = rm_tag($1);
                 } else {
-                    1; #die "ERROR: keyword_id $id (string $i) - no type\n"
+                    print LOG $keyword, "\tno type\n";
+                    #die "ERROR: keyword_id $id (string $i) - no type\n"
                 }
             }
         }
@@ -218,7 +217,8 @@ while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
                 my $last_rec = @{$trn{$variant}}[-1];
                 $$last_rec{syn} = \@syn if @syn;
             } else {
-                1;#die "ERROR: keyword_id $id (string $i) - no record for synonyms\n"
+                print LOG $keyword, "\tno record for synonyms\n";
+                #die "ERROR: keyword_id $id (string $i) - no record for synonyms\n"
             }
         }
         
@@ -228,39 +228,60 @@ while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
                 my $last_rec = @{$trn{$variant}}[-1];
                 push @{$$last_rec{ex}}, $1;
             } else {
-                1;#die "ERROR: keyword_id $id (string $i) - no record for examples\n"
+                print LOG $keyword, "\tno record for examples\n";
+                #die "ERROR: keyword_id $id (string $i) - no record for examples\n"
             }
         }
     }
     
+    for my $variant (sort {$a <=> $b} keys %trn) {
+        $tmp_basic->print(join("\t", ++$keyword_id, $keyword, $variant, $sorce, $target, $dic_source_name), "\n");
+        for my $rec (@{$trn{$variant}}) {
+            $tmp_group->print(join("\t", ++$group_id, $keyword_id, $rec->{type}, $rec->{num}, $rec->{tr}, $rec->{trn}), "\n");
+            if (exists $rec->{syn}) {
+                for my $syn (@{$rec->{syn}}) {
+                    $tmp_syn->print(join("\t", ++$syn_id, $group_id, $syn), "\n");
+                }
+            }
+            if (exists $rec->{ex}) {
+                for my $ex (@{$rec->{ex}}) {
+                    $tmp_ex->print(join("\t", ++$ex_id, $group_id, $ex), "\n");
+                }
+            }
+            if (exists $rec->{col}) {
+                for my $col (@{$rec->{col}}) {
+                    $tmp_col->print(join("\t", ++$col_id, $group_id, $col), "\n");
+                }
+            }
+        }
+    }
     
     1;
 }
+close LOG;
+$tmp_col->close();
+$tmp_ex->close();
+$tmp_syn->close();
+$tmp_group->close();
+$tmp_basic->close();
 
+print "loading database... ";
+$load_col->execute($tmp_col);
+$load_ex->execute($tmp_ex);
+$load_syn->execute($tmp_syn);
+$load_group->execute($tmp_group);
+$load_basic->execute($tmp_basic);
+print "ok\n";
 
+print "done\n";
+
+##################################################
 sub rm_tag {
-    my $str = shift;
-    
-    $str =~ s/<[a-z\/]+>//sg;
-    
+    my $str = shift;    
+    $str =~ s/<[a-z\/]+>//sg;    
     return $str;
 }
+##################################################
 
 1;
 
-__END__
-
-
-my $sss = '<abr><i><c><co>сущ.</co></c></i></abr>';
-
-my $arabic = 15;
-my $roman = 'IX';
-$roman = roman($arabic);                        # convert to roman numerals
-$arabic = arabic($roman) if isroman($roman);    # convert from roman numerals
-
-$sss =~ m/.*(<(.*?)>.*?<(\/\2)>)/;
-my $ss = $&;
-my $ee = $1;
-my $gg = $2;
-
-1;
