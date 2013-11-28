@@ -119,7 +119,9 @@ while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
     my @strings = split(/\n/, $data);
     
     (shift @strings) =~ m/<k>(.*)<\/k>/;
-    die "ERROR: keyword_id $id - no keyword\n" if $1 ne $keyword;
+    if ($id == 929) {
+        1;
+    }
     
     my %trn = ();
     my $variant = 0; # I II III IV V
@@ -129,6 +131,11 @@ while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
     my $translation;
     
     for (my $i = 0; $i < @strings; $i++) {
+        # part of speech
+        if (!$i && $strings[$i] =~ m/^(<.*>)/ && $strings[$i] !~ m/^<b>|<tr>|<dtrn>|<ex>|<iref>/) {
+            $type = rm_tag($1);
+        }
+        
         # collocation
         if ($strings[$i] =~ m/^•/) {
             for (; $i < @strings; $i++) {
@@ -138,32 +145,43 @@ while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
                 
             }
             last unless $i + 1 < @strings; 
-        }        
+        } elsif ($strings[$i] =~ m/^- *(<.*>)/) {
+            if (exists $trn{$variant} && @{$trn{$variant}}) {
+                my $last_rec = @{$trn{$variant}}[-1];
+                push @{$$last_rec{col}}, $1;
+            } else {
+                1;#die "ERROR: keyword_id $id (string $i) - no record for collocation\n"
+            }
+        }
         
         # variant
-        if ($strings[$i] =~ m/^<b>([IVX]+)<\/b> *(?:(?:<[^<>]+>)*<abr>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/abr>)?/) {
+        if ($strings[$i] =~ m/^<b>([IVX]+)<\/b> *(<.*>)?/) {
             $variant = arabic($1);
+            $record = 0;
+            $type = undef;
             # part of speech
-            if ($2) {
-               $type = $2;
+            if ($2 && $strings[$i] !~ m/<tr>|<dtrn>|<ex>|<iref>/) {      
+               $type = rm_tag($2);
             } else {
-                if ($i + 1 < @strings && $strings[$i + 1] =~ m/^(?:<[^<>]+>)*<abr>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/abr>/) {
-                    $type = $1;
+                if ($i + 1 < @strings && $strings[$i + 1] =~ m/^(<.*>)/) {
+                    $type = rm_tag($1) if $strings[$i + 1] !~ m/^<b>|<tr>|<dtrn>|<ex>|<iref>/;
                 } else {
-                    die "ERROR: keyword_id $id (string $i) - no type\n"
+                    1;#die "ERROR: keyword_id $id (string $i) - no type\n"
                 }
             }
         }
         
         # part of speech
-        if ($strings[$i] =~ m/<b>\d+\.<\/b> *(?:(?:<[^<>]+>)*<abr>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/abr>)?/) {
-            if ($1) {
-               $type = $1;
+        if ($strings[$i] =~ m/<b>\d+\.<\/b> *(<.*>)?/) {
+            $record = 0;
+            $type = undef;
+            if ($1 && $strings[$i] !~ m/<tr>|<dtrn>|<ex>|<iref>/) {
+               $type = rm_tag($1);
             } else {
-                if ($i + 1 < @strings && $strings[$i + 1] =~ m/^(?:<[^<>]+>)*<abr>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/abr>/) {
-                    $type = $1;
+                if ($i + 1 < @strings && $strings[$i + 1] =~ m/^(<.*>)/ && $strings[$i + 1] !~ m/^<b>|<tr>|<dtrn>|<ex>|<iref>/) {
+                    $type = rm_tag($1);
                 } else {
-                    die "ERROR: keyword_id $id (string $i) - no type\n"
+                    1; #die "ERROR: keyword_id $id (string $i) - no type\n"
                 }
             }
         }
@@ -172,8 +190,8 @@ while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
         if ($strings[$i] =~ m/^<tr>(.+?)<\/tr>/) {
             $transcription = $1;
             # part of speech
-            if ($i + 1 < @strings && $strings[$i + 1] =~ m/^(?:<[^<>]+>)*<abr>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/abr>/) {
-                $type = $1;
+            if ($i + 1 < @strings && $strings[$i + 1] =~ m/^(<.*>)/ && $strings[$i + 1] !~ m/^<b>|<tr>|<dtrn>|<ex>|<iref>/) {
+                $type = rm_tag($1);
             }
         } elsif ($strings[$i] =~ m/<tr>(.+?)<\/tr>/) {
             $transcription = $1;
@@ -184,7 +202,7 @@ while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
         
         # translation
         if ($strings[$i] =~ m/<dtrn>(.+?)<\/dtrn>/ ||
-            $strings[$i] =~ m/(?:<[^<>]+>)* *= *<kref>(?:<[^<>]+>)*([^<>]+)(?:<\/[^<>]+>)*<\/kref>/) {
+                $strings[$i] =~ m/(?:<[^<>]+>)* *(= *<kref>(?:<[^<>]+>)*[^<>]+(?:<\/[^<>]+>)*<\/kref>)/) {
             $transcription ||= '\N';
             $type ||= '\N';
             push @{$trn{$variant}}, {trn => $1, tr => $transcription, num => $record, type => $type};
@@ -193,30 +211,39 @@ while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
         # synonyms
         if ($i + 1 < @strings && $strings[$i] =~ m/^<b>Syn:<\/b>/) {
             my @syn = ();
-            while ($strings[$i + 1] =~ m/<kref>([^<>]+)<\/kref>/g) {
+            while ($strings[$i + 1] =~ m/(<kref>[^<>]+<\/kref>)/g) {
                push @syn, $1; 
             }
             if (exists $trn{$variant} && @{$trn{$variant}}) {
                 my $last_rec = @{$trn{$variant}}[-1];
-                $$last_rec{syn} = \@syn;
+                $$last_rec{syn} = \@syn if @syn;
             } else {
-                die "ERROR: keyword_id $id (string $i) - no record for synonyms\n"
+                1;#die "ERROR: keyword_id $id (string $i) - no record for synonyms\n"
             }
         }
         
         # examples
-        if ($strings[$i] =~ m/^<ex>([^<>]+)<\/ex>/) {
+        if ($strings[$i] =~ m/^<ex>(.+)<\/ex>/) {
             if (exists $trn{$variant} && @{$trn{$variant}}) {
                 my $last_rec = @{$trn{$variant}}[-1];
                 push @{$$last_rec{ex}}, $1;
             } else {
-                die "ERROR: keyword_id $id (string $i) - no record for examples\n"
+                1;#die "ERROR: keyword_id $id (string $i) - no record for examples\n"
             }
         }
     }
     
     
     1;
+}
+
+
+sub rm_tag {
+    my $str = shift;
+    
+    $str =~ s/<[a-z\/]+>//sg;
+    
+    return $str;
 }
 
 1;
