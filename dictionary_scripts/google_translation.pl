@@ -61,7 +61,9 @@ while (my $word = <IN>) {
 }
 close IN;
 close OUT;
+
 print "finished!\n";
 
-#load data local infile 'my_data.txt' into table my_data character set UTF8
+# MEMO:
+# load data local infile 'my_data.txt' into table my_data character set UTF8
 

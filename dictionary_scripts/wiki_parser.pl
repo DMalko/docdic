@@ -1,11 +1,6 @@
 #! /usr/bin/perl
-#
-# This example uses the get_pronunciations() method to print out
-# structured data pulled from the pronunciation sections of a
-# wiktionary page.
 
 ### !!! before `Wiktionary::Parser` install `Locale::Codes::Language` !!! ###
-
 
 use warnings;
 use strict;
@@ -28,6 +23,20 @@ while(<IN>) {
     my $document = $parser->get_document(title => $_);
     next unless $document;
     
+    my $translation_hashref     = $document->get_translations();
+    my $word_sense_hashref      = $document->get_word_senses();
+    my $parts_of_speech_hashref = $document->get_parts_of_speech();
+    my $pronunciations_hashref  = $document->get_pronunciations();
+    my $synonyms_hashref        = $document->get_synonyms();
+    my $hyponyms_hashref        = $document->get_hyponyms();
+    my $hypernyms_hashref       = $document->get_hypernyms();
+    my $antonyms_hashref        = $document->get_antonyms();
+    my $derived_terms_hashref   = $document->get_derived_terms();
+    
+    my $section_hashref = $document->get_sections();
+        my $sub_document = $document->get_sub_document(title => 'string or regex');
+        my $table_of_contents_arrayref = $document->get_table_of_contents();
+    
     my $pron = $document->get_pronunciations();
     my $audio = $pron->{en}{audio};
     if ($audio) {
@@ -47,6 +56,10 @@ print "finished!\n";
 __END__
 
 # original code:
+
+# This example uses the get_pronunciations() method to print out
+# structured data pulled from the pronunciation sections of a
+# wiktionary page.
 
 my $word = 'cat';
 my $parser = Wiktionary::Parser->new();

@@ -1,3 +1,5 @@
+CREATE DATABASE  IF NOT EXISTS `Dictionary` /*!40100 DEFAULT CHARACTER SET latin1 */;
+USE `Dictionary`;
 -- MySQL dump 10.13  Distrib 5.5.34, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: Dictionary
@@ -82,13 +84,13 @@ DROP TABLE IF EXISTS `dic_lingvo_basic`;
 CREATE TABLE `dic_lingvo_basic` (
   `keyword_id` int(11) NOT NULL AUTO_INCREMENT,
   `keyword` char(128) DEFAULT NULL,
-  `variant` int(11) NOT NULL DEFAULT '1',
+  `variant` int(11) DEFAULT NULL,
   `source` char(2) DEFAULT NULL,
   `target` char(2) DEFAULT NULL,
   `dictionary` char(64) DEFAULT NULL,
   PRIMARY KEY (`keyword_id`),
   KEY `keyword` (`keyword`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='utf8_general_ci';
+) ENGINE=MyISAM AUTO_INCREMENT=179971 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -105,7 +107,7 @@ CREATE TABLE `dic_lingvo_col` (
   PRIMARY KEY (`col_id`),
   KEY `group_id` (`group_id`),
   KEY `collocation` (`collocation`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='utf8_general_ci';
+) ENGINE=MyISAM AUTO_INCREMENT=32871 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -118,10 +120,10 @@ DROP TABLE IF EXISTS `dic_lingvo_ex`;
 CREATE TABLE `dic_lingvo_ex` (
   `ex_id` int(11) NOT NULL AUTO_INCREMENT,
   `group_id` int(11) DEFAULT NULL,
-  `example` char(128) DEFAULT NULL,
+  `example` text,
   PRIMARY KEY (`ex_id`),
   KEY `group_id` (`group_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=112609 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -140,7 +142,7 @@ CREATE TABLE `dic_lingvo_group` (
   `translation` char(128) DEFAULT NULL,
   PRIMARY KEY (`group_id`),
   KEY `keyword_id` (`keyword_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='utf8_general_ci';
+) ENGINE=MyISAM AUTO_INCREMENT=298891 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -157,6 +159,19 @@ CREATE TABLE `dic_lingvo_syn` (
   PRIMARY KEY (`syn_id`),
   KEY `group_id` (`group_id`),
   KEY `synonym` (`synonym`)
+) ENGINE=MyISAM AUTO_INCREMENT=99619 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `manual`
+--
+
+DROP TABLE IF EXISTS `manual`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `manual` (
+  `table` text,
+  `comments` text
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -284,4 +299,4 @@ CREATE TABLE `word_rank_simpsons` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-11-27  0:52:10
+-- Dump completed on 2013-11-29 16:48:52

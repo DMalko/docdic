@@ -1,5 +1,11 @@
 #!/usr/bin/perl
 
+=pod
+
+statistic for the tag set of lingvo dictionary
+
+=cut
+
 use strict;
 use warnings;
 
