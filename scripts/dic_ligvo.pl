@@ -11,11 +11,11 @@ use Encode;
 use File::Temp;
 
 ###################################
-my $dic_source_name = 'LingvoUniversalEnRu_2.4.2';
-#my $dic_source_name = 'LingvoUniversalRuEn_2.4.2';
-my $sorce = 'en';
-my $target = 'ru';
-my $clean = 1; # DROP TABLE source : 1 = yes, 0 = no
+#my $dic_source_name = 'LingvoUniversalEnRu_2.4.2';
+my $dic_source_name = 'LingvoUniversalRuEn_2.4.2';
+my $sorce = 'ru';
+my $target = 'en';
+my $clean = 0; # DROP TABLE source : 1 = yes, 0 = no
 
 my $db_name = 'Dictionary';
 my $host = 'localhost';
@@ -123,9 +123,6 @@ while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
     my @strings = split(/\n/, $data);
     
     (shift @strings) =~ m/<k>(.*)<\/k>/;
-    #if ($id == 929) {
-    #    1;
-    #}
     
     my %trn = ();
     my $variant = 0; # I II III IV V
@@ -147,7 +144,6 @@ while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
                 push @{$$last_rec{col}}, $1;
             } else {
                 print LOG $keyword, "\tno record for collocation\n";
-                #die "ERROR: keyword_id $id (string $i) - no record for collocation\n"
             }
         }
         
@@ -164,7 +160,6 @@ while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
                     $type = rm_tag($1) if $strings[$i + 1] !~ m/^<b>|<tr>|<dtrn>|<ex>|<iref>/;
                 } else {
                     print LOG $keyword, "\tno type\n";
-                    #die "ERROR: keyword_id $id (string $i) - no type\n"
                 }
             }
         }
@@ -180,7 +175,6 @@ while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
                     $type = rm_tag($1);
                 } else {
                     print LOG $keyword, "\tno type\n";
-                    #die "ERROR: keyword_id $id (string $i) - no type\n"
                 }
             }
         }
@@ -210,7 +204,7 @@ while (my ($id, $keyword, $data) = $query->fetchrow_array()) {
         # synonyms
         if ($i + 1 < @strings && $strings[$i] =~ m/^<b>Syn:<\/b>/) {
             my @syn = ();
-            while ($strings[$i + 1] =~ m/(<kref>[^<>]+<\/kref>)/g) {
+            while ($strings[$i + 1] =~ m/<kref>([^<>]+)<\/kref>/g) {
                push @syn, $1; 
             }
             if (exists $trn{$variant} && @{$trn{$variant}}) {
@@ -275,13 +269,15 @@ print "ok\n";
 
 print "done\n";
 
-##################################################
+################## subroutines ###################
+
 sub rm_tag {
     my $str = shift;    
     $str =~ s/<[a-z\/]+>//sg;    
     return $str;
 }
+
 ##################################################
 
-1;
+
 
