@@ -66,7 +66,7 @@ $dbh->do('CREATE TABLE IF NOT EXISTS `dic_lingvo_group` (
             `type` char(32) DEFAULT NULL,
             `record_num` int(3) DEFAULT NULL,
             `transcription` char(128) DEFAULT NULL,
-            `translation` char(128) DEFAULT NULL,
+            `translation` text,
             PRIMARY KEY (`group_id`),
             KEY `keyword_id` (`keyword_id`)
           ) ENGINE=MyISAM DEFAULT CHARSET=utf8'
