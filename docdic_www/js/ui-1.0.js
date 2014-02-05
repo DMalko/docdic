@@ -34,3 +34,14 @@ $('#swap').click(function(){
     return false;
 });
 /* END of swap */
+
+/* BEGIN of tabmenu */
+$('.tab_container').load(function() {
+    
+});
+
+$('.tab_list > a').click(function() {
+    var $this = $(this);
+
+});
+/* END of tabmenu */

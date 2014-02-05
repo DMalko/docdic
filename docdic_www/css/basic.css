@@ -42,10 +42,9 @@ body {
 .middleholder {
     position: relative;
     width: inherit;
-    height: 100px;
-    padding: 0px;
     margin: 0px;
 }
+
 
 .bottomholder {
     position: relative;
@@ -58,49 +57,51 @@ body {
 /* END of basic layout */
 
 /* BEGIN of tab menu */
-.tabmenu {
-    position: absolute;
-    bottom: 0px;
-    height: 42px;
-    width: 100%;
+.tlist {
+    display: block;
+}
+
+.tlist > div {
+    display: inline-block;
+    float: left;
+    width: 5px;
+    height: 35px;
+    margin-top: 5px;
     border-bottom: 1px solid rgb(200, 200, 200);
+    border-top: 1px solid rgb(240, 240, 240);
 }
 
-.tabmenu ul {
-    list-style: none;
-    margin: 0px;
-    padding: 0px;
-}
-
-.tabmenu ul li a {
+.tlist > a {
     text-decoration: none;
-    float: right;
+    display: inline-block;
+    float: left;
     width: 60px;
-    margin-right: 5px;
-    color: rgb(50,50,50);
-    border: 1px solid rgb(200, 200, 200);
-    border-bottom: none;
-    padding: 10px;
-    margin-top: 4px;
-    text-align: center;
-    display: block;
-    background-color: rgb(250,250,250);
+    height: 35px;
+    line-height: 35px;
     font-size: 14px;
-}
-
-.tabmenu ul li a:hover {
+    margin-top: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    color: rgb(100, 100, 100);
+    background-color: rgb(250, 250, 250);
+    border: 1px solid rgb(200, 200, 200);
     text-align: center;
-    display: block;
+    vertical-align: middle;
+}
+
+.tlist > a:hover {
     color: rgb(65,105,150);
 }
 
-.tabmenu ul li a#onlink {
+.tlist > a.tselected {
     margin-top: 0px;
-    padding-top: 15px;
+    padding-top: 5px;
     color: rgb(65,105,150);
-    background: rgb(255,255,255);
-    border-bottom: 1px solid rgb(255,255,255);
+    background-color: rgb(255, 255, 255);
+    border-bottom: 1px solid rgb(255, 255, 255);
+
 }
+
 /* END of tab menu */
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -163,8 +164,7 @@ body {
 /* BEGIN of transl bar */
 .translbar_wrapper {
     display: block;
-    float:left;
-    margin: 6px;
+    margin: 10px;
     padding: 0px;
     font-size: inherit;
     font-family: inherit;
@@ -252,57 +252,61 @@ body {
 
 /* ==============================================================================*/
 
-.tab_list {
-    position: relative;
-    display: inline-block;
-    margin: 5px;
-    /*border: 1px solid rgb(20, 200, 200);*/
-}
-
-.tab_item {
-    text-decoration: none;
-    display: inline-block;
-    float: left;
-    width: 60px;
-    height: 35px;
-    line-height: 35px;
-    font-size: 14px;
-    margin-top: 5px;
-    padding-left: 10px;
-    padding-right: 10px;
-    color: rgb(100, 100, 100);
-    background-color: rgb(250, 250, 250);
+/* BEGIN of tab container */
+.tcontainer {
+    display: block;
+    padding: 5px;
     border: 1px solid rgb(200, 200, 200);
-    text-align: center;
-    vertical-align: middle;
 }
 
-.tab_item:hover {
-    color: rgb(65,105,150);
+.theader {
+    position: relative;
+    display: block;
 }
 
-.tab_item.tab_selected {
-    margin-top: 0px;
-    padding-top: 5px;
-    color: rgb(65,105,150);
-    background-color: rgb(255, 255, 255);
-    border-bottom: 1px solid rgb(255, 255, 255);
-
-}
-
-.tab_spacer {
-    display: inline-block;
-    float: left;
-    width: 5px;
-    height: 35px;
-    margin-top: 5px;
+.theader_border {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
     border-bottom: 1px solid rgb(200, 200, 200);
-    border-top: 1px solid rgb(250, 250, 250);
 }
 
+.tinfo {
+    display: block;
+    width: 30%;
+    padding: 15px;
+    margin: 0px;
+    overflow: auto;
+    color: rgb(65,105,150);
+    font-weight: bold;
+}
 
+.tmenu {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin-top: 10px; 
+    display: block;
+}
 
+.tcontent {
+    display: block;
+    width: inherit;
+    padding: 0px;
+    margin: 0px;
+    border: 1px solid rgb(200, 200, 200);
+    border-top: none;
+}
 
+.tblock {
+    display: none;
+    padding: 5px;
+}
+
+.tblock.tbselected {
+    display: block;
+}
+/* END of tab ontainer */
 
 
 
