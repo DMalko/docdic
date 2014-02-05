@@ -22,26 +22,17 @@ $('.ddselect_item').click(function(){
 /* END of "selector" */
 
 /* BEGIN of swap */
-$('#swap').click(function(){
-    var item = $('#source input').val();
-    $('#source input').val($('#target input').val());
-    $('#target input').val(item);
+$('.swap').click(function(){
+    var source = $(this).closest('.translbar').find('#source .ddselect_hidden:text');
+    var target = $(this).closest('.translbar').find('#target .ddselect_hidden:text');
+    var item = source.val();
+    source.val(target.val());
+    target.val(item);
     
-    item = $('#source > .ddselect_item').html();
-    $('#source > .ddselect_item').html($('#target > .ddselect_item').html());
-    $('#target > .ddselect_item').html(item);
+    item = $('#source .ddselect > .ddselect_item').html();
+    $('#source .ddselect > .ddselect_item').html($('#target .ddselect > .ddselect_item').html());
+    $('#target .ddselect > .ddselect_item').html(item);
 
     return false;
 });
 /* END of swap */
-
-/* BEGIN of tabmenu */
-$('.tab_container').load(function() {
-    
-});
-
-$('.tab_list > a').click(function() {
-    var $this = $(this);
-
-});
-/* END of tabmenu */

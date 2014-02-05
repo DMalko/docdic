@@ -2,315 +2,75 @@
 * {
     font-family: sans-serif;
 }
-
+/* the solution for WEB-Kit sibling selctors bug
+ * I'VE GOT ANOTHER SOLUTION!!!! SEE SOURCE CODE
 body {
+    -webkit-animation: bugfix infinite 1s;
+}
+@-webkit-keyframes bugfix {
+    from { padding: 0; } to { padding: 0; }
+}
+*/
+
+body, html {
+    height: 100%;
+    margin: 0; 
+    padding: 0;
     background-color: rgb(215, 215, 215);
 }
-
 .topbar {
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 1000;
     height: 40px;
+    text-align: center;
     background-color: rgb(40, 40, 40);
     border: none;
     box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.25);
     -moz-box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.25);
     -webkit-box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.25);
 }
-
+.topbar_spacer {
+    height: 40px;
+}
 .base {
     position: relative;
-    margin: 0px auto;
-    width: 900px;
-    background-color: rgb(240, 240, 240);
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0;
+    height: 100%;
+    width: 700px;
+    background-color: rgb(255, 255, 255);
     box-shadow: 6px 6px 4px -4px rgba(0, 0, 0, 0.15), -6px 6px 4px -4px rgba(0, 0, 0, 0.15); 
     -moz-box-shadow: 6px 6px 4px -4px rgba(0, 0, 0, 0.15), -6px 6px 4px -4px rgba(0, 0, 0, 0.15); 
     -webkit-box-shadow: 6px 6px 4px -4px rgba(0, 0, 0, 0.15), -6px 6px 4px -4px rgba(0, 0, 0, 0.15);
 }
-
-.topholder {
-    position: relative;
-    width: inherit;
-    height: 80px;
-    padding: 0px;
-    margin: 0px;
-    background-color: rgb(255, 255, 255);
-    border-bottom: 1px solid;
-    border-bottom-color: rgb(155, 155, 155);
+.page_content {
+    padding: 10px;
 }
-
-.middleholder {
-    position: relative;
-    width: inherit;
-    margin: 0px;
+.btn {
+    display: block;
+    margin: 0;
+    padding: 5px 10px 5px 10px;
+    font-weight: bold;
+    border: 1px solid rgb(200,200,200);
+    -webkit-appearance: none;
 }
-
-
-.bottomholder {
-    position: relative;
-    width: inherit;
-    min-height: 500px;
-    padding: 0px;
-    margin: 0px;
-    background-color: rgb(255, 255, 255);
+.text-input {
+    padding: 5px;
+    color: rgb(90,90,90);
+    border: 1px solid rgb(200,200,200);
 }
 /* END of basic layout */
 
-/* BEGIN of tab menu */
-.tlist {
-    display: block;
-}
-
-.tlist > div {
-    display: inline-block;
-    float: left;
-    width: 5px;
-    height: 35px;
-    margin-top: 5px;
-    border-bottom: 1px solid rgb(200, 200, 200);
-    border-top: 1px solid rgb(240, 240, 240);
-}
-
-.tlist > a {
-    text-decoration: none;
-    display: inline-block;
-    float: left;
-    width: 60px;
-    height: 35px;
-    line-height: 35px;
-    font-size: 14px;
-    margin-top: 5px;
-    padding-left: 10px;
-    padding-right: 10px;
-    color: rgb(100, 100, 100);
-    background-color: rgb(250, 250, 250);
-    border: 1px solid rgb(200, 200, 200);
-    text-align: center;
-    vertical-align: middle;
-}
-
-.tlist > a:hover {
-    color: rgb(65,105,150);
-}
-
-.tlist > a.tselected {
-    margin-top: 0px;
-    padding-top: 5px;
-    color: rgb(65,105,150);
-    background-color: rgb(255, 255, 255);
-    border-bottom: 1px solid rgb(255, 255, 255);
-
-}
-
-/* END of tab menu */
-
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
-/* BEGIN of "selector" */
-.ddselect {
-    position: relative;
-    margin: 0;
-    padding: 0;
-    font-size: 16px;
-    font-family: inherit;
-    color: rgb(65,105,150);
-    background-color: rgb(250,250,250);
-}
-
-.ddselect_hidden {
-    display: none;
-}
-
-.ddselect_item {
-    display: block;
-    width: inherit;
-    height: inherit;
-    overflow: hidden;
-    text-decoration: none;
-    font-size: inherit;
-    font-family: inherit;
-    color: inherit;
-    background-color: inherit;
-    border: 1px solid rgb(200, 200, 200);
-}
-
-.ddselect > .ddselect_item {
-    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAJCAYAAAAl45yBAAAABHNCSVQICAgIfAhkiAAAAINJREFUOI29k0EOwjAMBGf3c/0Id97CnY/wtUjEHFqQG6pWAsP6kFiJd7KHqLUWLJrO1+cW0emC6GAbXrfms8AA3C4nPpFzk00UoDtIIiJWQ99C38DZrMtg4yHp1iNLwKNpSPNKlCTdBY/mWqoKugveglRBD8EZVgkFUP5O/9Rh4l/pAQbGMxsvVloUAAAAAElFTkSuQmCC) no-repeat;
-    background-position:right bottom;
-}
-
-.ddselect_list {
-    position: absolute;
-    z-index: 999;
-    display: none;
-    width: inherit;
-    font-size: inherit;
-    font-family: inherit;
-    color: inherit;
-    background-color: inherit;
-    border: none;
-}
-
-.ddselect_list .ddselect_item {
-    border-top: none;
-}
-
-.ddselect_list .ddselect_item:hover {
-    color: rgb(250, 250, 250);
-    background-color: rgb(65, 105, 150);
-}
-/* END of "selector" */
-
-/* BEGIN of transl bar */
-.translbar_wrapper {
-    display: block;
-    margin: 10px;
-    padding: 0px;
-    font-size: inherit;
-    font-family: inherit;
-}
-
-.translbar_wrapper .ddselect {
-    width: 100px;
-}
-
-.translbar_wrapper .ddselect_item {
-    height: 40px;
-    line-height: 40px;
-    text-align: center;
-    vertical-align: middle;
-    /*padding-left: 5px;*/
-}
-
-.transltable, th, td{
-    font-size: inherit;
-    font-family: inherit;
-    padding: 0px;
-    margin: 0px;
-    border: none;
-}
-
-#swap {
-    display: block;
-    width: 60px;
-    height: 40px;
-    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAAoCAYAAACiu5n/AAAABHNCSVQICAgIfAhkiAAAAPpJREFUaIHtmDEOgzAQBPfyuXwkfd6SPh/J12guFRQIkBLdmI3jkVxZAobF9h0xTVPqj7ic/QCtGcK9M4R7Bxe+3p/0LT4CFXaTlUBhR1kJEnaVlQBhZ1lJisrSslr29biVXk8qTNg92ZkyYSINgtJPWtpO2ulllG9aTnJbIMeSszRWeLhKo6Wlo3T5puXOaA/PpEXx8rVwJrMSaOld4cxUREiSImIZ6zkCUnpXOCKWFDNzGfMcDSVttYbXENLIseTcJlonPFP5An9CuDJhq0qrRWtpnbD1L55qqMbDUpjssuyE6ZbSatNqgV3CNIfNQ48cNg89Mj7p3nkDhcRgaZb0m4kAAAAASUVORK5CYII=) no-repeat;
-    border-top: 1px solid rgb(200, 200, 200);
-    border-bottom: 1px solid rgb(200, 200, 200);
-}
-
-.trnslquery_holder {
-    width: 280px;
-    height: 40px;
-    line-height: 40px;
-    margin: 0px;
-    padding-left: 5px;
-    padding-right: 5px;
-    font-size: inherit;
-    font-family: inherit;
-    background-color: rgb(255, 255, 255);
-    border-top: 1px solid rgb(200, 200, 200);
-    border-bottom: 1px solid rgb(200, 200, 200);
-}
-
-.trnslquery {
-    display: inline;
-    width: 100%;
-    margin: 0px;
-    padding: 0px;
-    font-size: inherit;
-    font-family: inherit;
-    text-align: center;
-    background-color: rgb(255, 255, 255);
-    border: none;
-}
-
-.turnslbutton_holder {
-    height: 40px;
-    width: 100px;
-    font-size: inherit;
-    font-family: inherit;
-    background-color: rgb(255, 255, 255);
-    border: 1px solid rgb(200, 200, 200);
-}
-
-.turnslbutton {
-    display: block;
-    width: inherit;
-    height: inherit;
-    margin: 0px;
-    padding: 0px;
-    color: rgb(240,120,80);
-    font-weight: bold;
-    font-size: inherit;
-    font-family: inherit;
-    background-color: rgb(250, 250, 250);
-    border: none;
-    -webkit-appearance: none;
-}
-/* END of transl bar */
-
-/* ==============================================================================*/
-
-/* BEGIN of tab container */
-.tcontainer {
-    display: block;
-    padding: 5px;
-    border: 1px solid rgb(200, 200, 200);
-}
-
-.theader {
-    position: relative;
-    display: block;
-}
-
-.theader_border {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    border-bottom: 1px solid rgb(200, 200, 200);
-}
-
-.tinfo {
-    display: block;
-    width: 30%;
-    padding: 15px;
-    margin: 0px;
-    overflow: auto;
-    color: rgb(65,105,150);
-    font-weight: bold;
-}
-
-.tmenu {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    margin-top: 10px; 
-    display: block;
-}
-
-.tcontent {
-    display: block;
-    width: inherit;
-    padding: 0px;
-    margin: 0px;
-    border: 1px solid rgb(200, 200, 200);
-    border-top: none;
-}
-
-.tblock {
-    display: none;
+.transl_content {
+    float: right;
+    width: 410px;
     padding: 5px;
 }
-
-.tblock.tbselected {
-    display: block;
+.transl_content .tab.menu_body {
+    min-height: 326px;
 }
-/* END of tab ontainer */
-
-
-
-
-
-
 
