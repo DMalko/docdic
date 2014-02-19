@@ -1,0 +1,50 @@
+/* BEGIN of selector */
+.ddselect {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+    font-family: inherit;
+    color: rgb(65,105,150);
+    background-color: rgb(250,250,250);
+}
+.ddselect_hidden {
+    display: none;
+}
+.ddselect_item {
+    /* 'height', 'line-height', 'text-align' and 'vertical-align' must be defined in the "wrapper" block */
+    display: block;
+    overflow: hidden;
+    text-decoration: none;
+    font-size: inherit;
+    font-family: inherit;
+    color: inherit;
+    background-color: inherit;
+    border: 1px solid rgb(200, 200, 200);
+}
+.ddselect_item:focus, .ddselect_item:active {
+    outline: none;
+}
+.ddselect > .ddselect_item {
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAJCAYAAAAl45yBAAAABHNCSVQICAgIfAhkiAAAAINJREFUOI29k0EOwjAMBGf3c/0Id97CnY/wtUjEHFqQG6pWAsP6kFiJd7KHqLUWLJrO1+cW0emC6GAbXrfms8AA3C4nPpFzk00UoDtIIiJWQ99C38DZrMtg4yHp1iNLwKNpSPNKlCTdBY/mWqoKugveglRBD8EZVgkFUP5O/9Rh4l/pAQbGMxsvVloUAAAAAElFTkSuQmCC) no-repeat;
+    background-position:right bottom;
+}
+.ddselect_list {
+    position: absolute;
+    z-index: 999;
+    display: none;
+    width: inherit;
+    font-size: inherit;
+    font-family: inherit;
+    color: inherit;
+    background-color: inherit;
+    border: none;
+}
+.ddselect_list .ddselect_item {
+    border-top: none;
+}
+.ddselect_list .ddselect_item:hover {
+    color: rgb(250, 250, 250);
+    background-color: rgb(65, 105, 150);
+}
+/* END of selector */

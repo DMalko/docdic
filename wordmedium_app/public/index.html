@@ -1,11 +1,230 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Welcome to the Mojolicious real-time web framework!</title>
-  </head>
-  <body>
-    <h2>Welcome to the Mojolicious real-time web framework!</h2>
-    This is the static document "public/index.html",
-    <a href="/">click here</a> to get back to the start.
-  </body>
+<!–[if IE 7 ]> <html lang="en" class="ie7″> <![endif]–>
+<!–[if IE 8 ]> <html lang="en" class="ie8″> <![endif]–>
+<!–[if IE 9 ]> <html lang="en" class="ie9″> <![endif]–>
+<!–[if (gt IE 9)|!(IE)]><!–> <html lang="en"> <!–<![endif]–>
+
+<head>
+	<title>Documet Dictionary</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="user-scalable=yes, initial-scale=1.0, width=device-width">
+	<!--[if lt IE 9]>
+	     <script src="js/html5shiv.js"></script>
+	<![endif]-->
+
+	<link rel="icon" type="image/x-icon" href="/favicon.ico">
+	<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+
+	<link rel="stylesheet" type="text/css" href="css/normalize.css">
+	<link rel="stylesheet" type="text/css" href="css/basic.css">
+	<link rel="stylesheet" type="text/css" href="css/form.selector.css">
+	<link rel="stylesheet" type="text/css" href="css/menu.css">
+	<link rel="stylesheet" type="text/css" href="css/menu.main.css">
+	<link rel="stylesheet" type="text/css" href="css/menu.tab.css">
+	<link rel="stylesheet" type="text/css" href="css/transl.bar.css">
+	<link rel="stylesheet" type="text/css" href="css/signin.css">
+
+</head>
+<body>	
+	<div class="topbar">
+	</div>
+	<div class="base">
+		<div class="topbar_spacer"></div>
+		<div class="main menu_container">
+			<div class="main menu_title">
+				<div><span style="color: rgb(240,120,80)">Word</span>Medium</div>
+				<div style="color: rgb(150,150,150); font-size: 12px; letter-spacing: 2px;">PRACTICE MAKES PERFECT</div>
+			</div>
+			<div class="main menu_head">
+				<div class="main menu_topholder">
+					=)
+				</div>
+				<div class="main menu">
+					<ul>
+					<li><a class="main menu_label active_label" href="#">Home</a></li>
+					<li><a class="main menu_label" href="#">Features</a></li>
+					<li><a class="main menu_label" href="#">Contact us</a></li>
+					</ul>
+				</div>
+			</div>
+			
+			<div class="main menu_separator"></div>
+			
+			<div class="main menu_body">
+				<div class="main body_content active_content"><!-- DICTIONARY -->
+					<div class="translbar_wrapper">
+						<form class="translform" >
+						<div class="translbar">
+							<div id="source">
+								<div class="ddselect">
+									<a class="ddselect_item" href="#">English</a>
+									<div class="ddselect_list">
+									<a class="ddselect_item" href="#"><span class="ddselect_hidden">en</span>English</a>
+									<a class="ddselect_item" href="#"><span class="ddselect_hidden">ru</span>Русский</a>
+									<a class="ddselect_item" href="#"><span class="ddselect_hidden">es</span>Español</a>	
+									</div>
+									<input class="ddselect_hidden" type="text" name="trnslsource" value="en">
+								</div>
+							</div>
+							<div id="swap">
+								<a href="#" class="swap"></a>
+							</div>
+							<div id="target">
+								<div class="ddselect">
+									<a class="ddselect_item" href="#">Русский</a>
+									<div class="ddselect_list">
+									<a class="ddselect_item" href="#"><span class="ddselect_hidden">en</span>English</a>
+									<a class="ddselect_item" href="#"><span class="ddselect_hidden">ru</span>Русский</a>
+									<a class="ddselect_item" href="#"><span class="ddselect_hidden">es</span>Español</a>	
+									</div>
+									<input class="ddselect_hidden" type="text" name="trnsltarget" value="ru">
+								</div>
+							</div>
+							<div id="query" class="trnslquery_holder">
+								<input class="trnslquery" name="trnslquery" type="text" placeholder="Enter some text here">
+							</div>
+							<div id="translate" class="turnslbutton_holder">
+								<input class="turnslbutton" type="submit" value="Translate">
+							</div>
+							<div style="clear: both"></div>
+						</div>
+						</form>
+					</div>
+					<div class="page_content">						
+<!-- BEGIN of sign in/up block -->
+<div class="signxx_wrapper">
+	<input id="signxx_chkbox" class="signxx_chkbox" type="checkbox">
+	<div class="bug_wrapper"><!-- don't remove this wrapper becase of web-kit sibling selector bug -->
+		<label class="signxx_label" for="signxx_chkbox">
+			<span class="sgnin">Create an account</span>
+			<span class="sgnup">&#8592; Sign in</span>
+		</label>
+		
+		<div class="signinbar">
+			<form>
+				<input value="b9712522b541fa15cbed2af1b8d88765e1d0be42" name="authenticity_token" type="hidden">
+				<input value="in" name="sign" type="hidden">
+				
+				<label class="input-label" for="in_name">User name or email</label>
+				<input id="in_name" class="text-input" name="username" maxlength="20" type="text">
+				
+				<label class="input-label" for="in_pass">Password</label>
+				<input id="in_pass" class="text-input" name="userpass" type="password">
+				
+				<input class="btn" type="submit" value="Sign in">
+			</form>
+		</div>
+		<div class="passreset">
+			<form>
+				<input value="b9712522b541fa15cbed2af1b8d88765e1d0be42" name="authenticity_token" type="hidden">
+				<input value="reset" name="sign" type="hidden">
+				
+				<label class="input-label" for="in_name"><div class="fogot-pswrd-block"><strong>Forgot password?</strong></div>Enter your email address</label>
+				<input id="in_name" class="text-input" name="useremail" type="text">
+				
+				<!-- honey spot -->
+				<label class="hspot" for="email">Retype email</label>
+				<input id="email" class="hspot" name="email" type="text">
+				<!-- honey spot -->
+				
+				
+				<input class="btn" type="submit" value="Send password reset email">
+			</form>
+		</div>
+		
+		<div class="signupbar">
+			<form>
+				<input value="b9712522b541fa15cbed2af1b8d88765e1d0be42" name="authenticity_token" type="hidden">
+				<input value="up" name="sign" type="hidden">
+					
+				<label class="input-label" for="up_name">User name</label>
+				<input id="up_name" class="text-input" autocomplete="off" name="username" maxlength="20" type="text">
+				
+				<label class="input-label" for="in_email">Email</label>
+				<input id="in_email" class="text-input" autocomplete="off" name="useremail" type="text">
+				
+				<!-- honey spot -->
+				<label class="hspot" for="email">Retype email</label>
+				<input id="email" class="hspot" name="email" type="text">
+				<!-- honey spot -->
+				
+				<label class="input-label" for="up_pass">Password</label>
+				<input id="up_pass" class="text-input" name="userpass" type="password">
+				
+				<label class="input-label" for="up_pass_retype">Retype password</label>
+				<input id="up_pass_retype" class="text-input" name="userpass_retype" type="password">
+				
+				<input class="btn" type="submit" value="Sign up">
+			</form>
+		</div>
+	</div>
+</div>
+<!-- END of sign in/up block -->
+<!-- BEGIN tab menu -->
+<div class="transl_content">
+	<div class="tab menu_container">
+		<div class="tab menu_head">
+			<div class="tab_info"></div>
+			<div class="tab menu">
+				<ul>
+				<li><a class="tab menu_label" href="#">Lingvo</a>
+				<li><a class="tab menu_label" href="#">Google</a>
+				<li><a class="tab menu_label active_label" href="#">Wiktionary</a>
+				</ul>
+			</div>
+			<div style="clear: both"></div>
+		</div>
+		<div class="tab menu_body">
+			<div class="tab body_content">tab1</div>
+			<div class="tab body_content">tab2</div>			
+			<div class="tab body_content active_content">tab3</div>
+		</div>
+	</div>
+</div>
+<!-- END of tab menu -->
+<div style="clear: both"></div>
+					</div>
+				</div>
+				<div class="main body_content"><!-- FEATURES -->				
+					<div class="page_content">
+						<div>
+							<h3>Features:</h3>
+							<ol>
+								<li>Trackable dictionary</li>
+								<li>Word grabber</li>
+								<li>Customizing personal lessons</li>
+								<li>Language community</li>
+							</ol>
+						</div>
+					</div>
+				</div>
+				<div class="main body_content"><!-- SIGN IN -->
+					<div class="page_content">
+						<p>email: support@email.com</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+<script src="js/jquery-1.10.2.js"></script>
+<script src="js/ui-1.0.js"></script>
+<script src="js/menu-1.0.js"></script>
+
+</body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
