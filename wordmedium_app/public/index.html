@@ -107,48 +107,51 @@
 				<input id="signin_hs" class="hspot" name="hs_email" type="text">
 				<!-- honey spot -->
 				
-				<label class="input-label" for="signin_name">User name or email</label>
-				<input id="signin_name" class="text-input" name="uname" maxlength="20" type="text">
+				<label class="input-label" for="signin_uname"><span class="input-error">* </span>User name or email</label>
+				<input id="signin_uname" class="text-input" name="uname" maxlength="20" type="text">
 				
-				<label class="input-label" for="signin_pass">Password</label>
+				<label class="input-label" for="signin_pass"><span class="input-error">* </span>Password</label>
 				<input id="signin_pass" class="text-input" name="pass" type="password">
 				
+				<div class="error-message">* wrong input value</div>
 				<input class="btn" type="submit" value="Sign in">
 			</form>
 		</div>
-		<div class="passreset">
+		<div class="passresetbar">
 			<form name="passreset" action="/passreset" method="post">
 				<!-- honey spot -->
 				<label class="hspot" for="passreset_hs">honey spot email</label>
 				<input id="passreset_hs" class="hspot" name="hs_email" type="text">
 				<!-- honey spot -->
 				
-				<label class="input-label" for="passreset_name"><div class="fogot-pswrd-block"><strong>Forgot password?</strong></div>Enter your email address</label>
+				<label class="input-label" for="passreset_name"><div class="fogot-pswrd-block"><strong>Forgot password?</strong></div><span class="input-error">* </span>Enter your email address</label>
 				<input id="passreset_name" class="text-input" name="email" type="text">
 				
+				<div class="error-message">* wrong input value</div>
 				<input class="btn" type="submit" value="Send password reset email">
 			</form>
 		</div>
 		
 		<div class="signupbar">
-			<form name="signup" action="/signup" method="post">
+			<form name="signup" action="/signup" method="post" >
 				<!-- honey spot -->
 				<label class="hspot" for="signup_hs">honey spot email</label>
 				<input id="signup_hs" class="hspot" name="hs_email" type="text">
 				<!-- honey spot -->
 				
-				<label class="input-label" for="signup_name">User name</label>
-				<input id="signup_name" class="text-input" autocomplete="off" name="uname" maxlength="20" type="text">
+				<label class="input-label" for="signup_uname"><span class="input-error">* </span>User name</label>
+				<input id="signup_uname" class="text-input" autocomplete="off" name="uname" maxlength="20" type="text">
 				
-				<label class="input-label" for="signup_email">Email</label>
+				<label class="input-label" for="signup_email"><span class="input-error">* </span>Email</label>
 				<input id="signup_email" class="text-input" autocomplete="off" name="email" type="text">
 				
-				<label class="input-label" for="signup_pass">Password</label>
+				<label class="input-label" for="signup_pass"><span class="input-error">* </span>Password</label>
 				<input id="signup_pass" class="text-input" name="pass" type="password">
 				
-				<label class="input-label" for="signup_repass">Retype password</label>
+				<label class="input-label" for="signup_repass"><span class="input-error">* </span>Retype password</label>
 				<input id="signup_repass" class="text-input" name="repass" type="password">
 				
+				<div class="error-message">* wrong input value</div>
 				<input class="btn" type="submit" value="Sign up">
 			</form>
 		</div>
