@@ -11,7 +11,9 @@ use Mojo::Base 'Mojolicious';
 my $domain = 'wordmedium.com';
 
 # App mails
-my $noreplay_mail = 'noreplay@wordmedium.com';
+my $smtp_server  = 'smtp.gmail.com';
+my $support_mail = 'wordmedium.team@gmail.com';
+my $support_pass = 'wordmedium';
 
 # Database parameters
 my $dbname = 'wmdb';
@@ -33,8 +35,13 @@ sub startup {
     # Sendmail helper `mail` #
     ###########################
     $self->plugin(mail => {
-        from => $noreplay_mail,
+        from => $support_mail,
         type => 'text/plain',
+        how  => 'smtp',
+        howargs => [ $smtp_server,
+            AuthUser => $support_mail,
+            AuthPass => $support_pass,
+        ]
     });
     
     # Database helper `db` #
@@ -111,10 +118,12 @@ sub startup {
     
     # usage:
     # my $password = $self->randpass($pass_length);
+    # default password length is 10
     $self->helper(randpass => sub {
         my $self = shift;
         my $length = shift;
         
+        $length ||= 10;
         # Avoids using confusing characters such as lower case L (l) and the number one (1), the letter 'O' and the number zero.
         my @chars = ('A'..'N','P'..'Z','a'..'k','m','n','p'..'z','2'..'9');
         my $password = '';
@@ -126,7 +135,7 @@ sub startup {
     
     # usage:
     # $self->passreset($uid, $new_password);
-    $self->helper(passreset => sub {
+    $self->helper(passrst => sub {
         my $self = shift;
         my $uid = shift;
         my $pass = shift;

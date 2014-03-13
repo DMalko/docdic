@@ -101,16 +101,16 @@
 		</label>
 		
 		<div class="signinbar">
-			<form name="signin" action="/signin" method="post">
+			<form name="signin" action="/signin" method="post" data-autosubmit="1">
 				<!-- honey spot -->
 				<label class="hspot" for="signin_hs">honey spot email</label>
 				<input id="signin_hs" class="hspot" name="hs_email" type="text">
 				<!-- honey spot -->
 				
-				<label class="input-label" for="signin_uname"><span class="input-error">* </span>User name or email</label>
+				<label class="input-label" for="signin_uname">User name or email</label>
 				<input id="signin_uname" class="text-input" name="uname" maxlength="20" type="text">
 				
-				<label class="input-label" for="signin_pass"><span class="input-error">* </span>Password</label>
+				<label class="input-label" for="signin_pass">Password</label>
 				<input id="signin_pass" class="text-input" name="pass" type="password">
 				
 				<div class="error-message">* wrong input value</div>
@@ -118,7 +118,7 @@
 			</form>
 		</div>
 		<div class="passresetbar">
-			<form name="passreset" action="/passreset" method="post">
+			<form name="passreset" action="/passreset" method="post" data-autosubmit="1">
 				<!-- honey spot -->
 				<label class="hspot" for="passreset_hs">honey spot email</label>
 				<input id="passreset_hs" class="hspot" name="hs_email" type="text">
@@ -133,7 +133,7 @@
 		</div>
 		
 		<div class="signupbar">
-			<form name="signup" action="/signup" method="post" >
+			<form name="signup" action="/signup" method="post" data-autosubmit="1">
 				<!-- honey spot -->
 				<label class="hspot" for="signup_hs">honey spot email</label>
 				<input id="signup_hs" class="hspot" name="hs_email" type="text">

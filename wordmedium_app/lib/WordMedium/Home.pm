@@ -22,49 +22,48 @@ sub signup {
 	}
 	
 	unless ($uname && $email && $pass && $repass) { # please fill in all required fields
-# TODO: add flash 'please fill in all required fields'
-		$self->redirect_to('/');
+		$self->render(json => {msg => 'Please fill in all required fields.'});
 		return 1;
 	}
 	
-	if ($uname eq $pass) { # user name cannot be the same as your email 
-# TODO: add flash 'user name cannot be the same as your email'
-		$self->redirect_to('/');
+	if ($uname eq $pass) { # user name cannot be the same as your email
+		$self->render(json => {msg => 'The user name cannot be the same as your email.'});
 		return 1;
 	}
 
 	# check user name
 	if ($self->user2uid($uname)) { # user name already exists
-# TODO: add flash 'user name already exists'
-		$self->redirect_to('/');
+		$self->render(json => {msg => 'The user name already exists.'});
 		return 1;
 	}
 	
 	# check email
 	if ($self->user2uid($email)) { # email already exists
-# TODO: add flash 'email already exists'
-		$self->redirect_to('/');
+		$self->render(json => {msg => 'The email already exists.'});
 		return 1;
 	}
 	
 	# check password match
 	if ($pass ne $repass) { # wrong password match
-# TODO: add flash 'wrong password match'
-		$self->redirect_to('/');
+		$self->render(json => {msg => 'The password does not match the confirm password.'});
 		return 1;
 	}
 	
 	# create record
 	my $crptpass = $self->bcrypt($pass);
-	my $setuid = $self->db->prepare(q{INSERT INTO user VALUES ('\N', ?, ?, ?)});
-        unless ($setuid->execute($uname, $email, $crptpass)) {
-# TODO: add flash 'registration denied'
-		$self->redirect_to('/');
-#$self->app->log->debug("registration denied!\n");
+	my $setuid = $self->db->prepare(q{INSERT INTO user VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)});
+        unless ($setuid->execute('\N', $uname, $email, $crptpass)) { # registration denied
+		$self->render(json => {msg => 'Registration denied.'});
+		#$self->app->log->debug("registration denied!\n");
 		return 1;
 	}
-	
-	$self->render(text => "USER IS CREATED!");
+
+	if ($self->authenticate($uname, $pass)) {
+		# redirect to members page
+		$self->render(json => {redirect => '/test'});
+	} else {
+		$self->render(json => {msg => 'The account is not created.'});
+	}
 	return 1;
 }
 
@@ -80,11 +79,17 @@ sub signin {
 		return 1;
 	}
 	
+	unless ($uname && $pass) { # please fill in all required fields
+		$self->render(json => {msg => 'Please fill in all required fields.'});
+		return 1;
+	}
+	
 	if ($self->authenticate($uname, $pass)) {
-# TODO: add redirect to members page
-		$self->render(text => "WELCOME!");
+		# redirect to members page
+		$self->render(json => {redirect => '/test'});
 	} else {
-		$self->redirect_to('/');
+		# send message: wrong user name or password
+		$self->render(json => {msg => 'Wrong user name or password.'});
 	}
 	return 1;
 }
@@ -110,24 +115,27 @@ sub passreset {
 	
 	my $uid = $self->user2uid($email);
 	unless ($uid) {
-# TODO: add flash 'wrong email'
-		$self->redirect_to('/');
+		$self->render(json => {msg => 'The email you entered does not belong to any account.'});
 		return 1;
 	}
 	
 	my $domain = $self->mydomain();
 	my $new_password = $self->randpass(10); # password length = 10
-	if ($self->passreset($uid, $new_password)) {
-		$self->mail(
+	#$self->app->log->debug("new password: $new_password\n");
+	if ($self->passrst($uid, $new_password)) {
+		my $is_ok = $self->mail(
 			to      => $email,
 			subject => 'password recovery',
 			data    => "\nYour temporary password for $domain: $new_password\n\nPlease, change the password after signin.\n\nBest regards,\n$domain team"
 		);
-# TODO: add flash 'email sent'
-		$self->render(text => "Email was sent to $email");
+		$self->app->log->debug("sendmail: $is_ok\n");
+		if ($is_ok) {
+			$self->render(json => {msg => "Email was sent to $email"});
+		} else {
+			$self->render(json => {msg => "Email was not sent."});
+		}
 	} else {
-# TODO: add flash 'fault of password reset'
-		$self->redirect_to('/');		
+		$self->render(json => {msg => 'Password reset error.'});		
 	}
 	return 1;
 }
