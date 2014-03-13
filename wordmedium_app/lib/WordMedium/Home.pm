@@ -126,13 +126,13 @@ sub passreset {
 		my $is_ok = $self->mail(
 			to      => $email,
 			subject => 'password recovery',
-			data    => "\nYour temporary password for $domain: $new_password\n\nPlease, change the password after signin.\n\nBest regards,\n$domain team"
+			data    => "Your temporary password for $domain: $new_password\n\nPlease, change the password after signin.\n\nBest regards,\n$domain team"
 		);
 		$self->app->log->debug("sendmail: $is_ok\n");
 		if ($is_ok) {
 			$self->render(json => {msg => "Email was sent to $email"});
 		} else {
-			$self->render(json => {msg => "Email was not sent."});
+			$self->render(json => {msg => "Email was not sent. Try again."});
 		}
 	} else {
 		$self->render(json => {msg => 'Password reset error.'});		
