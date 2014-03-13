@@ -40,7 +40,7 @@ sub startup {
     ##########################################
     $self->plugin('PODRenderer');
     
-    # Sendmail helper `mail` #
+    # SMTP+SSL helper `mail` #
     ###########################
     $self->helper(mail => sub {
         my $self = shift;
@@ -56,29 +56,37 @@ sub startup {
         $attr{subject} ||= $smtp_sbj;
         $attr{data}    ||= $smtp_msg;
         
-        my $smtp = Net::SMTP::SSL->new(
-            $attr{host}, 
-            Hello => $attr{hello}, 
-            Port => $attr{port},
-            LocalPort => 0,        # Necessary
-            Debug => 0
-        );
-        return undef if !defined $smtp;
-        
-        my $auth_return = $smtp->auth($attr{login}, $attr{pass});
-        my $mail_return = $smtp->mail($attr{from});
-        my $to_return = $smtp->to($attr{to});
-        
-        $smtp->data();
-        $smtp->datasend("To: $attr{to}\n");
-        $smtp->datasend("From: $attr{from}\n");    # Could be any address
-        $smtp->datasend("Subject: $attr{subject}\n");
-        $smtp->datasend("\n");                    # Between headers and body
-        $smtp->datasend($attr{data});
-        $smtp->dataend();
-        $smtp->quit;
-        
-        return 1 if $auth_return && $mail_return && $to_return;
+        $SIG{CHLD} = 'IGNORE';             # Avoid zombie processes
+        my $pid = fork();
+        if (defined $pid) {
+            if ($pid == 0) {
+                my $smtp = Net::SMTP::SSL->new(
+                    $attr{host}, 
+                    Hello => $attr{hello}, 
+                    Port => $attr{port},
+                    LocalPort => 0,        # Necessary
+                    Debug => 0
+                );
+                exit(1) if !defined $smtp;
+                
+                my $auth_return = $smtp->auth($attr{login}, $attr{pass});
+                my $mail_return = $smtp->mail($attr{from});
+                my $to_return = $smtp->to($attr{to});
+                
+                $smtp->data();
+                $smtp->datasend("To: $attr{to}\n");
+                $smtp->datasend("From: $attr{from}\n");    # Could be any address
+                $smtp->datasend("Subject: $attr{subject}\n");
+                $smtp->datasend("\n");                     # Between headers and body
+                $smtp->datasend($attr{data});
+                $smtp->dataend();
+                $smtp->quit;
+                
+                exit(0) if $auth_return && $mail_return && $to_return;
+                exit(1);
+            }
+            return 1;
+        }
         return undef;
     });
     
