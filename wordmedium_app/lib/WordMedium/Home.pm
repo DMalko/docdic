@@ -121,18 +121,14 @@ sub passreset {
 	
 	my $domain = $self->mydomain();
 	my $new_password = $self->randpass(10); # password length = 10
-	#$self->app->log->debug("new password: $new_password\n");
+	#$self->app->log->debug("email: $email => new password: $new_password\n");
 	if ($self->passrst($uid, $new_password)) {
-		my $is_ok = $self->mail(
+		$self->render_later;            # prevent auto-render
+		$self->mail(
 			to      => $email,
 			subject => 'password recovery',
 			data    => "Your temporary password for $domain: $new_password\n\nPlease, change the password after signin.\n\nBest regards,\n$domain team"
 		);
-		if ($is_ok) {
-			$self->render(json => {msg => "Email was sent to $email"});
-		} else {
-			$self->render(json => {msg => "Email was not sent. Try again."});
-		}
 	} else {
 		$self->render(json => {msg => 'Password reset error.'});		
 	}
