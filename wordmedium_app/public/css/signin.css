@@ -90,11 +90,8 @@
 .fogot-pswrd-block {
 	margin-bottom: 5px;
 }
-.input-error, .error-message {
-	color: rgb(180, 40, 10);
-	visibility: hidden;
-}
-.error-message {
+.form-message {
 	margin: 10px 0 10px 0;
 	text-align: left;
+	visibility: hidden;
 }

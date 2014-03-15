@@ -1,7 +1,6 @@
 package WordMedium;
 
 use Mojo::Base 'Mojolicious';
-use Mojo::IOLoop::ForkCall;
 use Net::SMTP::SSL;
 
 # Dependences:
@@ -9,7 +8,7 @@ use Net::SMTP::SSL;
 # 2. Mojolicious::Plugin::Authentication
 # 3. Mojolicious::Plugin::Bcrypt
 # 4. Net::SMTP::SSL (instead of sendmail-dependent Mojolicious::Plugin::Mail)
-# 5. Mojo::IOLoop::ForkCall
+# 5. Mojo::IOLoop::ForkCall (run blocking functions asynchronously by forking)
 
 # App domain
 my $domain = 'wordmedium.com';
@@ -44,57 +43,49 @@ sub startup {
     
     # Sendmail helpers `smtp_ssl`, `mail` #
     #######################################
+    # returns reference to sendmail function
     $self->helper(smtp_ssl => sub {
         my $self = shift;
-        my $attr = shift;
         
-        $attr->{host}    ||= $smtp_host;
-        $attr->{port}    ||= $smtp_port;
-        $attr->{login}   ||= $smtp_login;
-        $attr->{pass}    ||= $smtp_pass;
-        $attr->{hello}   ||= $smtp_hello;
-        $attr->{from}    ||= $smtp_from;
-        $attr->{to}      ||= $smtp_to;
-        $attr->{subject} ||= $smtp_sbj;
-        $attr->{data}    ||= $smtp_msg;
-        
-        my $smtp = Net::SMTP::SSL->new(
-            $attr->{host}, 
-            Hello => $attr->{hello}, 
-            Port => $attr->{port},
-            LocalPort => 0,        # Necessary
-            Debug => 0
-        );
-        return undef if !defined $smtp;
-        
-        my $auth_return = $smtp->auth($attr->{login}, $attr->{pass});
-        my $mail_return = $smtp->mail($attr->{from});
-        my $to_return = $smtp->to($attr->{to});
-        
-        $smtp->data();
-        $smtp->datasend("To: $attr->{to}\n");
-        $smtp->datasend("From: $attr->{from}\n");    # Could be any address
-        $smtp->datasend("Subject: $attr->{subject}\n");
-        $smtp->datasend("\n");                     # Between headers and body
-        $smtp->datasend($attr->{data});
-        $smtp->dataend();
-        $smtp->quit;
-        
-        return 1 if $auth_return && $mail_return && $to_return;
-        return undef;
-    });
-    
-    $self->helper(mail => sub {
-        my $self = shift;
-        my %attr = @_;
-        
-        if ($attr{to} && $self->smtp_ssl(\%attr)) {
-	    $self->render(json => {msg => "Email was sent to $attr{to}"});
-            return 1;
-	} else {
-	    $self->render(json => {msg => "Email was not sent. Try again."});
+        my $function = sub {
+            my %attr = @_;
+            
+            $attr{host}    ||= $smtp_host;
+            $attr{port}    ||= $smtp_port;
+            $attr{login}   ||= $smtp_login;
+            $attr{pass}    ||= $smtp_pass;
+            $attr{hello}   ||= $smtp_hello;
+            $attr{from}    ||= $smtp_from;
+            $attr{to}      ||= $smtp_to;
+            $attr{subject} ||= $smtp_sbj;
+            $attr{data}    ||= $smtp_msg;
+            
+            my $smtp = Net::SMTP::SSL->new(
+                $attr{host}, 
+                Hello => $attr{hello}, 
+                Port => $attr{port},
+                LocalPort => 0,        # Necessary
+                Debug => 0
+            );
+            return undef if !defined $smtp;
+            
+            my $auth_return = $smtp->auth($attr{login}, $attr{pass});
+            my $mail_return = $smtp->mail($attr{from});
+            my $to_return = $smtp->to($attr{to});
+            
+            $smtp->data();
+            $smtp->datasend("To: $attr{to}\n");
+            $smtp->datasend("From: $attr{from}\n");    # Could be any address
+            $smtp->datasend("Subject: $attr{subject}\n");
+            $smtp->datasend("\n");                     # Between headers and body
+            $smtp->datasend($attr{data});
+            $smtp->dataend();
+            $smtp->quit;
+            
+            return 1 if $auth_return && $mail_return && $to_return;
             return undef;
-	}
+        };
+        return $function;
     });
     
     # Database helper `db` #
@@ -210,6 +201,7 @@ sub startup {
     $r->route('/signin')->to('home#signin');
     $r->route('/signout')->to('home#signout');
     $r->route('/passreset')->to('home#passreset');
+    $r->route('/test1')->to('home#test');
     $r->route('/test')->over(authenticated => 1)->to('home#test');
     
 }

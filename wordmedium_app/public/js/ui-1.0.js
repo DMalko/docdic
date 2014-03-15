@@ -68,15 +68,20 @@ $(function() {
 });
 
 $('form[data-autosubmit]').bind('formdata', function(event, data){
-    var emsg = $(this).find('.error-message');
+    var emsg = $(this).find('.form-message');
     if (emsg) {
         emsg.html(data.msg);
+        if (data.msgtype == 'ok') {
+            emsg.css('color', 'rgb(20, 190, 20)'); // green
+        } else {
+            emsg.css('color', 'rgb(180, 40, 10)'); // red
+        }
         emsg.css('visibility', 'visible');
     }
 });
 
 $('form[data-autosubmit]').click(function(){
-    var emsg = $(this).find('.error-message');
+    var emsg = $(this).find('.form-message');
     if (emsg) {
         emsg.css('visibility', 'hidden');
     }
