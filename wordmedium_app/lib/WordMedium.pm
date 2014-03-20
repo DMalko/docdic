@@ -4,38 +4,30 @@ use Mojo::Base 'Mojolicious';
 use Net::SMTP::SSL;
 
 # Dependences:
+# 0. EV , AnyEvent ??? 
 # 1. Mojolicious::Plugin::Database
 # 2. Mojolicious::Plugin::Authentication
 # 3. Mojolicious::Plugin::Bcrypt
 # 4. Net::SMTP::SSL (instead of sendmail-dependent Mojolicious::Plugin::Mail)
 # 5. Mojo::IOLoop::ForkCall (run blocking functions asynchronously by forking)
 
-# App domain
-my $domain = 'wordmedium.com';
+#$ENV{MOJO_MODE} = 'production';
+#$ENV{MOJO_MODE} = 'test';
 
-# App smtp mail server
-my $smtp_host  = 'smtp.gmail.com';
-my $smtp_port  = 465;
-my $smtp_login = 'wordmedium.team';
-my $smtp_pass  = 'wordmedium';
-my $smtp_hello = 'wordmedium.com';
-my $smtp_from  = 'wordmedium.team@gmail.com';
-my $smtp_to    = 'wordmedium.team@gmail.com';
-my $smtp_sbj   = '';
-my $smtp_msg   = '';
-
-# Database parameters
-my $dbname = 'wmdb';
-my $dbhost = 'localhost';
-my $dbport = '3306';
-my $dbuser = 'root';
-my $dbpass = '';
+# App config
+my $config_file = 'wordwedium.conf';
 
 # This method will run once at server start
 sub startup {
     my $self = shift;
+
+    # Configuration #
+    #################
+    my $config = $self->plugin('Config', { file => $config_file });
     
-    $self->secrets(['In vino veritas, in aqua sanitas!']);
+    # Secret #
+    ##########
+    $self->secrets([$config->{secret}]);
     
     # Documentation browser under "/perldoc" #
     ##########################################
@@ -47,18 +39,19 @@ sub startup {
     $self->helper(smtp_ssl => sub {
         my $self = shift;
         
+        my $config = $self->app->config;
         my $function = sub {
             my %attr = @_;
             
-            $attr{host}    ||= $smtp_host;
-            $attr{port}    ||= $smtp_port;
-            $attr{login}   ||= $smtp_login;
-            $attr{pass}    ||= $smtp_pass;
-            $attr{hello}   ||= $smtp_hello;
-            $attr{from}    ||= $smtp_from;
-            $attr{to}      ||= $smtp_to;
-            $attr{subject} ||= $smtp_sbj;
-            $attr{data}    ||= $smtp_msg;
+            $attr{host}    ||= $config->{smtp_host};
+            $attr{port}    ||= $config->{smtp_port};
+            $attr{login}   ||= $config->{smtp_login};
+            $attr{pass}    ||= $config->{smtp_pass};
+            $attr{hello}   ||= $config->{smtp_hello};
+            $attr{from}    ||= $config->{smtp_from};
+            $attr{to}      ||= $config->{smtp_to};
+            $attr{subject} ||= $config->{smtp_sbj};
+            $attr{data}    ||= $config->{smtp_msg};
             
             my $smtp = Net::SMTP::SSL->new(
                 $attr{host}, 
@@ -90,12 +83,12 @@ sub startup {
     
     # Database helper `db` #
     ########################
-    my $dsn = "dbi:mysql:$dbname:$dbhost:$dbport";
+    my $dsn = "dbi:mysql:$config->{dbcore}->{name}:$config->{dbcore}->{host}:$config->{dbcore}->{port}";
     $self->plugin('database', { 
         dsn      => $dsn,
-        username => $dbuser,
-        password => $dbpass,
-        options  => {RaiseError => 1, AutoCommit => 1, mysql_enable_utf8 => 1, mysql_auto_reconnect => 1},
+        username => $config->{dbcore}->{user},
+        password => $config->{dbcore}->{pass},
+        options  => {RaiseError => 1, AutoCommit => 1, mysql_enable_utf8 => 1},
         helper   => 'db'
     });
     
@@ -155,10 +148,7 @@ sub startup {
     
     # usage:
     # my $domain = $self->mydomain();
-    $self->helper(mydomain => sub {
-        my $self = shift;
-        return $domain;
-    });
+    $self->helper(mydomain => sub { return shift->app->config->{mydomain}; });
     
     # usage:
     # my $password = $self->randpass($pass_length);

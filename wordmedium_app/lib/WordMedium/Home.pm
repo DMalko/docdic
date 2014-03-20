@@ -121,7 +121,7 @@ sub passreset {
 		return 1;
 	}
 	
-	my $domain = $self->mydomain();
+	my $domain = $self->mydomain;
 	my $new_password = $self->randpass(10); # password length = 10
 	#$self->app->log->debug("email: $email => new password: $new_password\n");
 	if ($self->passrst($uid, $new_password)) {
