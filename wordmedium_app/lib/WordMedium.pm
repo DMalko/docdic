@@ -15,7 +15,7 @@ use Net::SMTP::SSL;
 #$ENV{MOJO_MODE} = 'test';
 
 # App config
-my $config_file = 'wordwedium.conf';
+my $config_file = 'wordmedium.conf';
 
 # This method will run once at server start
 sub startup {
