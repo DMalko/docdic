@@ -33,6 +33,10 @@ sub startup {
     ##########################################
     $self->plugin('PODRenderer');
     
+    # Generator of random passwords #
+    #################################
+    $self->plugin('RandomPassword', { helper => 'randpass', length => 10 });
+    
     # Sendmail helpers `smtp_ssl`, `mail` #
     #######################################
     # returns reference to sendmail function
@@ -150,22 +154,6 @@ sub startup {
     # my $domain = $self->mydomain();
     $self->helper(mydomain => sub { return shift->app->config->{mydomain}; });
     
-    # usage:
-    # my $password = $self->randpass($pass_length);
-    # default password length is 10
-    $self->helper(randpass => sub {
-        my $self = shift;
-        my $length = shift;
-        
-        $length ||= 10;
-        # Avoids using confusing characters such as lower case L (l) and the number one (1), the letter 'O' and the number zero.
-        my @chars = ('A'..'N','P'..'Z','a'..'k','m','n','p'..'z','2'..'9');
-        my $password = '';
-        for (0..$length) {
-            $password .= $chars[int rand @chars];
-        }
-        return $password;
-    });
     
     # usage:
     # $self->passreset($uid, $new_password);

@@ -29,9 +29,10 @@ sub single {
     my $conf = shift;
     
     my $smtp = SMTP::Sender->new($conf);
-    $app->attr('_smtp' => $smtp);
+    my $attr_name = '_smtp';
+    $app->attr($attr_name => $smtp);
     my $helper_name = $conf->{helper} || 'smtp';
-    $app->helper($helper_name => sub { return shift->app->smtp });
+    $app->helper($helper_name => sub { return shift->app->$attr_name() });
 }
 
 sub multi {
