@@ -123,13 +123,14 @@ sub passreset {
 	
 	my $domain = $self->mydomain;
 	my $new_password = $self->randpass();
-	$self->app->log->debug("email: $email => new password: $new_password\n");
+	#$self->app->log->debug("email: $email => new password: $new_password\n");
 	if ($self->passrst($uid, $new_password)) {
 		$self->render_later;            # prevent auto-render
 		my $fc = Mojo::IOLoop::ForkCall->new;
 		$fc->run(
 			$self->smtp_ssl, # returns reference to sendmail function
 			[
+				from    => $self->app->config->{support_mail},
 				to      => $email,
 				subject => 'password recovery',
 				data    => "Your temporary password for $domain: $new_password\n\nPlease, change the password after signin.\n\nBest regards,\n$domain team"

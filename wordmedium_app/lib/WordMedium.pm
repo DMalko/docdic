@@ -37,9 +37,10 @@ sub startup {
     #################################
     $self->plugin('RandomPassword', { helper => 'randpass', length => 10 });
     
-    # Sendmail helpers `smtp_ssl`, `mail` #
-    #######################################
-    # returns reference to sendmail function
+    # SMTP SSL agent #
+    ##################
+    $self->plugin('SMTP', { helper => 'smtp_ssl', server => $config->{smtp_server} });
+    
     $self->helper(smtp_ssl => sub {
         my $self = shift;
         
