@@ -121,10 +121,13 @@ sub passreset {
 		return 1;
 	}
 	
-	my $domain = $self->mydomain;
+	my $domain = $self->main_domain;
 	my $new_password = $self->randpass();
 	#$self->app->log->debug("email: $email => new password: $new_password\n");
-	if ($self->passrst($uid, $new_password)) {
+	
+        my $crptpass = $self->bcrypt($new_password);
+        my $passreset = $self->db->prepare(q{UPDATE user SET pass = ? WHERE uid = ?});
+	if ($passreset->execute($crptpass, $uid)) {
 		$self->render_later;            # prevent auto-render
 		my $mail = $self->smtp_ssl({
 			mail => { # Mail attributes
