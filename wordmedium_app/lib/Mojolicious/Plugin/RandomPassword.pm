@@ -2,7 +2,6 @@ package Mojolicious::Plugin::RandomPassword;
 use Mojo::Base 'Mojolicious::Plugin';
 
 use Carp;
-use Data::Dumper;
 
 our $VERSION = '0.1';
 
@@ -18,14 +17,13 @@ sub register {
     croak __PACKAGE__, ": missing helper name\n"
         unless exists $attr->{helper} && length($attr->{helper}) > 0;
     
-    my $pass = sub { Mojolicious::Plugin::RandomPassword->new($attr->{charset}, $attr->{length}) };
-    $app->log->debug("pass: ".Dumper($pass->())."\n");
+    my $pass = sub { __PACKAGE__->ini($attr->{charset}, $attr->{length}) };
     my $attr_name = '_randpass_' . $attr->{helper};
     $app->attr($attr_name => $pass);
     $app->helper($attr->{helper} => sub { return shift->app->$attr_name->password(shift) });
 }
 
-sub new {
+sub ini {
     my $class = shift;
     my $chars = shift;
     my $len   = shift;
@@ -69,10 +67,7 @@ version 0.1
 
 =head1 SYNOPSIS
 
-Provides generation a random password. 
-
-    use Mojolicious::Plugin::RandomPassword;
-
+    # Mojolicious
     sub startup {
         my $self = shift;
         
@@ -82,10 +77,14 @@ Provides generation a random password.
             length  => 10                                                      # optional
         });
     }
+    
+    # in controller
+    my $new_password = $self->randpass();
+    my $new_password_length_15 = $self->randpass(15);
 
 =head1 CONFIGURATION
 
-=over 4
+=over 3
 
 =item 'helper'      helper name
 
@@ -115,7 +114,7 @@ C<< <dmalko at cpan.org> >>
 
 You can also look for information at:
 
-=over 4
+=over 3
 
 =item * AnnoCPAN: Annotated CPAN documentation
 

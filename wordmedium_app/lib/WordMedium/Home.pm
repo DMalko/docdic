@@ -126,27 +126,25 @@ sub passreset {
 	#$self->app->log->debug("email: $email => new password: $new_password\n");
 	if ($self->passrst($uid, $new_password)) {
 		$self->render_later;            # prevent auto-render
-		my $fc = Mojo::IOLoop::ForkCall->new;
-		$fc->run(
-			$self->smtp_ssl, # returns reference to sendmail function
-			[
+		my $mail = $self->smtp_ssl({
+			mail => { # Mail attributes
 				from    => $self->app->config->{support_mail},
 				to      => $email,
 				subject => 'password recovery',
 				data    => "Your temporary password for $domain: $new_password\n\nPlease, change the password after signin.\n\nBest regards,\n$domain team"
-			],
-			sub { # callback function
+			},
+			cb => sub { # Callback function
 				my ($fc, $err, $res) = @_;
+				
 				if ($res) {
 					$self->render(json => {msg => "The email was sent to $email", msgtype => 'ok'});
 					return 1;
 				} else {
-					$self->render(json => {msg => 'The email was not sent. Try again.', msgtype => 'error'});
+					$self->render(json => {msg => 'Internal error. Try again.', msgtype => 'error'});
 					return undef;
 				}
 			}
-		);
-		$fc->ioloop->start unless $fc->ioloop->is_running;
+		});
 		return 1;
 	} else {
 		$self->render(json => {msg => 'Password reset error.', msgtype => 'error'});

@@ -12,7 +12,7 @@ use Net::SMTP::SSL;
 # 5. Mojo::IOLoop::ForkCall (run blocking functions asynchronously by forking)
 
 #$ENV{MOJO_MODE} = 'production';
-#$ENV{MOJO_MODE} = 'test';
+$ENV{MOJO_MODE} = 'development';
 
 # App config
 my $config_file = 'wordmedium.conf';
@@ -33,58 +33,13 @@ sub startup {
     ##########################################
     $self->plugin('PODRenderer');
     
-    # Generator of random passwords #
-    #################################
+    # Password generator #
+    ######################
     $self->plugin('RandomPassword', { helper => 'randpass', length => 10 });
     
     # SMTP SSL agent #
     ##################
     $self->plugin('SMTP', { helper => 'smtp_ssl', server => $config->{smtp_server} });
-    
-    $self->helper(smtp_ssl => sub {
-        my $self = shift;
-        
-        my $config = $self->app->config;
-        my $function = sub {
-            my %attr = @_;
-            
-            $attr{host}    ||= $config->{smtp_host};
-            $attr{port}    ||= $config->{smtp_port};
-            $attr{login}   ||= $config->{smtp_login};
-            $attr{pass}    ||= $config->{smtp_pass};
-            $attr{hello}   ||= $config->{smtp_hello};
-            $attr{from}    ||= $config->{smtp_from};
-            $attr{to}      ||= $config->{smtp_to};
-            $attr{subject} ||= $config->{smtp_sbj};
-            $attr{data}    ||= $config->{smtp_msg};
-            
-            my $smtp = Net::SMTP::SSL->new(
-                $attr{host}, 
-                Hello => $attr{hello}, 
-                Port => $attr{port},
-                LocalPort => 0,        # Necessary
-                Debug => 0
-            );
-            return undef if !defined $smtp;
-            
-            my $auth_return = $smtp->auth($attr{login}, $attr{pass});
-            my $mail_return = $smtp->mail($attr{from});
-            my $to_return = $smtp->to($attr{to});
-            
-            $smtp->data();
-            $smtp->datasend("To: $attr{to}\n");
-            $smtp->datasend("From: $attr{from}\n");    # Could be any address
-            $smtp->datasend("Subject: $attr{subject}\n");
-            $smtp->datasend("\n");                     # Between headers and body
-            $smtp->datasend($attr{data});
-            $smtp->dataend();
-            $smtp->quit;
-            
-            return 1 if $auth_return && $mail_return && $to_return;
-            return undef;
-        };
-        return $function;
-    });
     
     # Database helper `db` #
     ########################
