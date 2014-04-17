@@ -4,8 +4,9 @@ use Mojo::Base 'Mojolicious::Plugin';
 use Carp;
 use DBI;
 use AnyEvent;
+use Digest::MD5 qw( md5_hex );
 
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 my $CONNECTION_LIFETIME = 120; # the max time to reuse the connection (sec)
 
@@ -14,7 +15,7 @@ my $INSTANCE_NUM = 0;
 
 sub register {
     my $plugin = shift;
-    my $app  = shift;
+    my $app = shift;
     my $attr = shift;
     
     croak __PACKAGE__, ": missing input parameter (must be a hash reference)"
@@ -24,13 +25,13 @@ sub register {
     croak __PACKAGE__, ": wrong database config (must be a hash reference)"
         unless exists $attr->{db} && ref($attr->{db}) eq 'HASH';
     
-    my $server = sub { __PACKAGE__->ini($attr->{db}) };
+    my $server = sub { __PACKAGE__->connect($attr->{db}) };
     my $attr_name = '_asyncmysql_' . $attr->{helper};
     $app->attr($attr_name => $server);
     $app->helper($attr->{helper} => sub { return shift->app->$attr_name });
 }
 
-sub ini {
+sub connect {
     my $class = shift;
     my ($dsn, $login, $pass, $attr) = @_;
     
@@ -38,14 +39,14 @@ sub ini {
         croak __PACKAGE__, ": can't connect to database $dsn";
         
     my $handler = Mojolicious::Plugin::AsyncMySQL::Handler->new($dbh);
-    $handler->cached();
     
     my $self = {
-        dsn   => $dsn,
-        login => $login,
-        pass  => $pass,
-        attr  => $attr,
-        cache => [$handler]
+        dsn          => $dsn,
+        login        => $login,
+        pass         => $pass,
+        attr         => $attr,
+        stack        => [$handler],
+        stack_cached => {}
     };
     bless $self, $class;
 }
@@ -58,53 +59,126 @@ sub lifetime {
     return $CONNECTION_LIFETIME;
 }
 
-sub prepare {
-    my ($self, $sql, $attr) = @_;
-    
-    $attr //= {};
-    $attr->{async} //= 1;
-    my $handler = $self->get_handler($self);
-    $handler->set_h($handler->{dbh}->prepare($sql, $attr));
-    return $handler;
-}
+###
+# $dbh->do({
+#    sql  => $sql,
+#    val  => [],
+#    attr => $attr,
+#    cd   => $cb
+# });
+#
+# $dbh->query({
+#    sql => $sql,
+#    val => [],
+#    attr => $attr,
+#    cd  => $cb
+# });
+#
+# $dbh->query_cached({
+#    sql => $sql,
+#    val => [],
+#    attr => $attr,
+#    cd  => $cb
+# });
+###
 
 sub do {
-    my ($self, $statement, @args) = @_;
+    my $self = shift;
+    my $args = shift;
     
-    my $cb = pop @args;
-    croak __PACKAGE__, ": missing callback function for `do` method"
-        unless $cb && ref($cb) eq 'CODE';
+    croak __PACKAGE__, ": missing callback function"
+        unless exists $args->{cb} && ref($args->{cb}) eq 'CODE';
     
-    (my $attr = shift @args) //= {};
-    $attr->{async} //= 1;
-    my $handler = $self->get_handler($self);
-    $handler->set_h;
-    $handler->set_cb($cb);
-    $handler->{dbh}->do($statement, $attr, @args);
+    my $handler = $self->get_handler($args->{cb});
+    
+    $args->{attr}->{async} = 1;
+    $handler->do($args);
+}
+
+sub query {
+    my $self = shift;
+    my $args = shift;
+    
+    croak __PACKAGE__, ": missing callback function"
+        unless exists $args->{cb} && ref($args->{cb}) eq 'CODE';
+    
+    my $sth_attr;
+    if(exists $args->{attr}) {
+        if(exists $args->{attr}->{mysql_use_result} || exists $args->{attr}->{mysql_store_result}) { # the attributes of the statement handle
+            $sth_attr->{mysql_use_result} = delete $args->{attr}->{mysql_use_result}; 
+            $sth_attr->{mysql_store_result} = delete $args->{attr}->{mysql_store_result};
+        }
+    }
+    
+    my $handler = $self->get_handler($args->{cb});
+    
+    $args->{attr}->{async} = 1;
+    $handler->prepare($args);
+    
+    $handler->execute($args->{val}, $sth_attr);
+    return 1;
+}
+
+sub query_cached {
+    my $self = shift;
+    my $args = shift;
+    
+    croak __PACKAGE__, ": missing callback function"
+        unless exists $args->{cb} && ref($args->{cb}) eq 'CODE';
+    
+    my $sth_attr;
+    if(exists $args->{attr}) {
+        if(exists $args->{attr}->{mysql_use_result} || exists $args->{attr}->{mysql_store_result}) { # the attributes of the statement handle
+            $sth_attr->{mysql_use_result} = delete $args->{attr}->{mysql_use_result}; 
+            $sth_attr->{mysql_store_result} = delete $args->{attr}->{mysql_store_result};
+        }
+    }
+
+### TODO: the next statement is slow and should be rewritten
+    my $key = exists $args->{attr} ? md5_hex(join('', $args->{sql}, map {$_, $args->{attr}->{$_}} sort(keys %{$args->{attr}}))) : md5_hex($args->{sql});
+    
+    my $handler = $self->get_handler($args->{cb}, $key);
+    
+    if(!$handler->is_prepared) {
+        $args->{attr}->{async} = 1;
+        $handler->prepare($args);
+    }
+    
+    $handler->execute($args->{val}, $sth_attr);
+    return 1;
 }
 
 sub get_handler {
     my $self = shift;
+    my $cb = shift;
+    my $key = shift;
     
-    my $handler = pop @{$self->{cache}};
+    my $stack = $key ? $self->{stack_cached}->{$key} : $self->{stack};
+    my $handler = pop @{$stack};
     if(!$handler || time - $handler->myclock > $CONNECTION_LIFETIME) {
         my $dbh = DBI->connect(@$self{qw{dsn login pass attr}}) ||
             croak __PACKAGE__, ": can't connect to database $self->{dsn}";
-        $handler = Mojolicious::Plugin::AsyncMySQL::Handler->new($dbh);
+        $handler = Mojolicious::Plugin::AsyncMySQL::Handler->new($dbh, $key);
+        
     }
-    $handler->uncached($self->{cache});
+    $handler->catch($stack, $cb);
     
-    if(@{$self->{cache}}) {
-        my $last_in_cache = @{$self->{cache}}[-1];
+    if(@$stack) {
+        my $last_in_cache = @{$stack}[-1];
         if(time - $last_in_cache->myclock > $CONNECTION_LIFETIME) {
-            $self->{cache} = []; # if the youngest cached handler is out of date then all cached handlers are out of date
+            # if the youngest cached handler is out of date then all cached handlers are out of date
+            if($key) {
+                $self->{stack_cached}->{$key} = [];
+            } else {
+                $self->{stack} = [];
+            }
         }
     }
     return $handler;
 }
 
-1;
-################################################
+
+#################################################
 
 package Mojolicious::Plugin::AsyncMySQL::Handler;
 
@@ -112,81 +186,71 @@ use strict;
 use warnings;
 
 use Carp;
+use Scalar::Util qw( weaken );
 
 sub new {
     my $class = shift;
     
     my $self = {
-        dbh => shift,
-        h => undef,
-        cb  => undef,
-        clock => time,
-        cache => undef,
-        io => undef,
-        i => $DEBUG ? ++$INSTANCE_NUM : undef
+        dbh       => shift, # dbh
+        h       => undef,
+        cb        => undef,
+        clock     => time,
+        stack_ref => undef,
+        key       => shift, # cache key (only for cached sth)
+        io        => undef,
+        i         => $DEBUG ? ++$INSTANCE_NUM : undef
     };
     
     croak __PACKAGE__, ": missing or wrong database handler (must be `DBI::db`)"
         unless $self->{dbh} && ref($self->{dbh}) eq 'DBI::db';
     
-    bless $self, $class;
-}
-
-sub execute {
-    my ($self, @args) = @_;
-    
-    croak __PACKAGE__, ": repeated calling an asynchronous function"
-        if $self->{cb};
-    croak __PACKAGE__, ": missing callback function for `execute` method"
-        unless ($self->{cb} = pop @args) && ref($self->{cb}) eq 'CODE';
-        
-    $self->{h}->execute(@args);
-}
-
-sub set_h {
-    my $self = shift;
-    my $h = shift;
-    if($h){
-        $self->{h} = $h;
-    } else {
-        $self->{h} = $self->{dbh};
-    }
-}
-
-sub set_cb {
-    my $self = shift;
-    croak __PACKAGE__, ": repeated calling an asynchronous function"
-        if $self->{cb}; 
-    $self->{cb} = shift;
-}
-
-sub cached {
-    my $self = shift;
-    $self->{cache} = undef;
-    $self->{io} = undef;
-}
-
-sub uncached {
-    my $self = shift;
-    $self->{cache} = shift;
-    
     $self->{io} = AnyEvent->io(
-        fh      => $self->{dbh}->mysql_fd,
-        poll    => 'r',
-        cb      => sub {
-            my $cb = $self->{cb};
-            my $h = $self->{h};
-            $self->{cb} = undef;
-            $self->{h} = undef;
-            if ($cb && $h) {
-                eval { $cb->($h->mysql_async_result, $h) };
+        fh => $self->{dbh}->mysql_fd,
+        poll => 'r',
+        cb => sub {
+            if ($self->{cb} && $self->{h}) {
+                eval { $self->{cb}->($self->{h}->mysql_async_result, $self->{h}) };
                 carp __PACKAGE__, ": callback error" if $@;
             } else {
                 carp __PACKAGE__, ": missing callback function or database handler";
             }
-            $self->{io} = undef;
+            $self->DESTROY;
         }
     );
+    
+    bless $self, $class;
+}
+
+sub do {
+    my ($self, $args) = @_;
+    $self->{h} = $self->{dbh};
+    $self->{h}->do($args->{sql}, $args->{attr}, @{$args->{val}});
+}
+
+sub prepare {
+    my ($self, $args) = @_;
+    $self->{h} = $self->{dbh}->prepare($args->{sql}, $args->{attr});
+}
+
+sub execute {
+    my ($self, $args, $attr) = @_;
+    if($attr) {
+        $self->{h}->{mysql_use_result} = $attr->{mysql_use_result} if exists $attr->{mysql_use_result};
+        $self->{h}->{mysql_store_result} = $attr->{mysql_store_result} if exists $attr->{mysql_store_result};
+    }
+    $self->{h}->execute(@$args);
+}
+
+sub is_prepared {
+    shift->{h} ? 1 : 0;
+}
+
+sub catch {
+    my $self = shift;
+    $self->{stack_ref} = shift;
+    $self->{cb} = shift;
+    return 1;
 }
 
 sub myclock {
@@ -200,19 +264,42 @@ sub DESTROY {
     my $self = shift;
     
     $self->{cb} = undef;
-    $self->{h} = undef;
-    $self->{io} = undef;
-    if($self->{cache}) { # object in use - must be returned in the cache
-        my $cache = $self->{cache};
-        $self->cached;
+    #$self->{io} = undef;
+    my $io = $self->{io};
+    if($self->{stack_ref}) { # object in use - must be returned in the stack
+        my $stack = $self->{stack_ref};
+        $self->{stack_ref} = undef;
         $self->myclock(time);
-        push @$cache, $self;
-        carp  "$self->{i} pushed in cache" if $DEBUG;
-    } else {             # object in a cache - must be destroyed if the cache is flushed
+        $self->{h} = undef unless $self->{key};
+        push @$stack, $self;
+        carp "$self->{i} pushed in cache" if $DEBUG;
+    } else { # object in the stack - must be destroyed if the stack is flushed
         $self->{dbh} = undef;
-        carp  "$self->{i} destroyed" if $DEBUG;
+        $self->{h} = undef;
+        carp "$self->{i} destroyed" if $DEBUG;
     }
     return;
+}
+
+#################################################
+
+package Mojolicious::Plugin::AsyncMySQL::Container;
+
+use strict;
+use warnings;
+
+use Carp;
+use Scalar::Util qw( weaken );
+
+sub new {
+    my $class = shift;
+    
+    my $self = {
+        clock   => time,
+        handler => shift
+    };
+    
+    bless $self, $class;
 }
 
 1;
