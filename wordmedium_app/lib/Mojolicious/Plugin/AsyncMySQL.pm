@@ -37,15 +37,18 @@ sub connect {
     
     my $dbh = DBI->connect($dsn, $login, $pass, $attr) ||
         croak __PACKAGE__, ": can't connect to database $dsn";
-        
     my $handler = Mojolicious::Plugin::AsyncMySQL::Handler->new($dbh);
+    my $container1 = Mojolicious::Plugin::AsyncMySQL::Container->new($handler);
+    
+    $handler = Mojolicious::Plugin::AsyncMySQL::Handler->new($dbh);
+    my $container2 = Mojolicious::Plugin::AsyncMySQL::Container->new($handler);
     
     my $self = {
         dsn          => $dsn,
         login        => $login,
         pass         => $pass,
         attr         => $attr,
-        stack        => [$handler],
+        stack        => [$container1, $container2],
         stack_cached => {}
     };
     bless $self, $class;
@@ -154,18 +157,18 @@ sub get_handler {
     my $key = shift;
     
     my $stack = $key ? $self->{stack_cached}->{$key} : $self->{stack};
-    my $handler = pop @{$stack};
-    if(!$handler || time - $handler->myclock > $CONNECTION_LIFETIME) {
+    my $container = pop @{$stack};
+    my $handler = $container && $container->is_alive ? $container->unpack : undef;
+    unless($handler) {
         my $dbh = DBI->connect(@$self{qw{dsn login pass attr}}) ||
             croak __PACKAGE__, ": can't connect to database $self->{dsn}";
         $handler = Mojolicious::Plugin::AsyncMySQL::Handler->new($dbh, $key);
-        
     }
     $handler->catch($stack, $cb);
     
-    if(@$stack) {
+    if(@$stack) { # flush the cache
         my $last_in_cache = @{$stack}[-1];
-        if(time - $last_in_cache->myclock > $CONNECTION_LIFETIME) {
+        unless($last_in_cache->is_alive) {
             # if the youngest cached handler is out of date then all cached handlers are out of date
             if($key) {
                 $self->{stack_cached}->{$key} = [];
@@ -195,7 +198,6 @@ sub new {
         dbh       => shift, # dbh
         h       => undef,
         cb        => undef,
-        clock     => time,
         stack_ref => undef,
         key       => shift, # cache key (only for cached sth)
         io        => undef,
@@ -263,20 +265,24 @@ sub myclock {
 sub DESTROY {
     my $self = shift;
     
-    $self->{cb} = undef;
-    #$self->{io} = undef;
-    my $io = $self->{io};
-    if($self->{stack_ref}) { # object in use - must be returned in the stack
-        my $stack = $self->{stack_ref};
-        $self->{stack_ref} = undef;
-        $self->myclock(time);
-        $self->{h} = undef unless $self->{key};
-        push @$stack, $self;
-        carp "$self->{i} pushed in cache" if $DEBUG;
-    } else { # object in the stack - must be destroyed if the stack is flushed
-        $self->{dbh} = undef;
-        $self->{h} = undef;
-        carp "$self->{i} destroyed" if $DEBUG;
+    if($self->{io}) {
+        $self->{cb} = undef;
+        if($self->{stack_ref}) { # object in use - must be returned in the stack
+            my $stack = $self->{stack_ref};
+            $self->{stack_ref} = undef;
+            $self->myclock(time);
+            $self->{h} = undef unless $self->{key};
+            my $container = Mojolicious::Plugin::AsyncMySQL::Container->new($self);
+            push @$stack, $container;
+            carp "$self->{i} pushed in cache" if $DEBUG;
+        } else { # object in the stack - must be destroyed if the stack is flushed
+            $self->{dbh} = undef;
+            $self->{h} = undef;
+            $self->{io} = undef;
+            carp "$self->{i} ready to be destroyed" if $DEBUG;
+        }
+    } elsif ($DEBUG) {
+        carp "$self->{i} destroyed"
     }
     return;
 }
@@ -289,7 +295,6 @@ use strict;
 use warnings;
 
 use Carp;
-use Scalar::Util qw( weaken );
 
 sub new {
     my $class = shift;
@@ -300,6 +305,33 @@ sub new {
     };
     
     bless $self, $class;
+}
+
+sub is_alive {
+    return undef if time - shift->{clock} > $CONNECTION_LIFETIME;
+    return 1;
+}
+
+sub unpack {
+    my $self = shift;
+    
+    unless($self->{handler}) {
+        carp __PACKAGE__, ": unpack empty container";
+        return undef;
+    }
+    
+    my $handler = $self->{handler};
+    $self->{handler} = undef;
+    return $handler;
+}
+
+sub DESTROY {
+    my $self = shift;
+    if(defined $self->{handler}) {
+        $self->{handler}->DESTROY;
+        $self->{handler} = undef;
+    }
+    return;
 }
 
 1;
