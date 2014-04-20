@@ -19,13 +19,13 @@ sub register {
     croak __PACKAGE__, ": wrong server config (must be a hash reference)\n"
         unless exists $attr->{server} && ref($attr->{server}) eq 'HASH';
     
-    my $server = sub { __PACKAGE__->ini($attr->{server}) };
+    my $server = sub { __PACKAGE__->connect($attr->{server}) };
     my $attr_name = '_smtp_' . $attr->{helper};
     $app->attr($attr_name => $server);
     $app->helper($attr->{helper} => sub { return shift->app->$attr_name->send(shift) });
 }
 
-sub ini {
+sub connect {
     my $class = shift;
     my $attr = shift;
     

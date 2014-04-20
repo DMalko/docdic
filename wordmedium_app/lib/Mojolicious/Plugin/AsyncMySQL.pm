@@ -6,12 +6,12 @@ use DBI;
 use AnyEvent;
 use Digest::MD5 qw( md5_hex );
 
-our $VERSION = '0.2';
+our $VERSION = '0.3';
 
 my $CONNECTION_LIFETIME = 120; # the max time to reuse the connection (sec)
-
-my $DEBUG = 1;
 my $INSTANCE_NUM = 0;
+
+my $DEBUG = 0;
 
 sub register {
     my $plugin = shift;
@@ -19,15 +19,15 @@ sub register {
     my $attr = shift;
     
     croak __PACKAGE__, ": missing input parameter (must be a hash reference)"
-        unless ref($attr) eq 'HASH';
+        unless $attr && ref($attr) eq 'HASH';
     croak __PACKAGE__, ": missing helper name"
-        unless exists $attr->{helper} && length($attr->{helper}) > 0;
-    croak __PACKAGE__, ": wrong database config (must be a hash reference)"
+        unless exists $attr->{helper};
+    croak __PACKAGE__, ": wrong connection parameters (must be a hash reference)"
         unless exists $attr->{db} && ref($attr->{db}) eq 'HASH';
     
-    my $server = sub { __PACKAGE__->connect($attr->{db}) };
+    #my $server = sub { __PACKAGE__->connect($attr->{db}) };
     my $attr_name = '_asyncmysql_' . $attr->{helper};
-    $app->attr($attr_name => $server);
+    $app->attr($attr_name => __PACKAGE__->connect($attr->{db}));
     $app->helper($attr->{helper} => sub { return shift->app->$attr_name });
 }
 
@@ -37,18 +37,15 @@ sub connect {
     
     my $dbh = DBI->connect($dsn, $login, $pass, $attr) ||
         croak __PACKAGE__, ": can't connect to database $dsn";
-    my $handler = Mojolicious::Plugin::AsyncMySQL::Handler->new($dbh);
-    my $container1 = Mojolicious::Plugin::AsyncMySQL::Container->new($handler);
-    
-    $handler = Mojolicious::Plugin::AsyncMySQL::Handler->new($dbh);
-    my $container2 = Mojolicious::Plugin::AsyncMySQL::Container->new($handler);
+        
+    my $handler = Mojolicious::Plugin::AsyncMySQL::Handler->new($dbh); # try to connect before using it
     
     my $self = {
         dsn          => $dsn,
         login        => $login,
         pass         => $pass,
         attr         => $attr,
-        stack        => [$container1, $container2],
+        stack        => [$handler],
         stack_cached => {}
     };
     bless $self, $class;
@@ -148,7 +145,7 @@ sub query_cached {
     }
     
     $handler->execute($args->{val}, $sth_attr);
-    return 1;
+    return $key;
 }
 
 sub get_handler {
@@ -156,19 +153,21 @@ sub get_handler {
     my $cb = shift;
     my $key = shift;
     
+    $self->{stack_cached}->{$key} = [] if $key && !$self->{stack_cached}->{$key}; # stack initialization for cached requests
+    
     my $stack = $key ? $self->{stack_cached}->{$key} : $self->{stack};
-    my $container = pop @{$stack};
-    my $handler = $container && $container->is_alive ? $container->unpack : undef;
-    unless($handler) {
+    my $handler = pop @{$stack};
+    if(!$handler || time - $handler->myclock > $CONNECTION_LIFETIME) {
         my $dbh = DBI->connect(@$self{qw{dsn login pass attr}}) ||
             croak __PACKAGE__, ": can't connect to database $self->{dsn}";
         $handler = Mojolicious::Plugin::AsyncMySQL::Handler->new($dbh, $key);
+        
     }
     $handler->catch($stack, $cb);
     
-    if(@$stack) { # flush the cache
+    if(@$stack) {
         my $last_in_cache = @{$stack}[-1];
-        unless($last_in_cache->is_alive) {
+        if(time - $last_in_cache->myclock > $CONNECTION_LIFETIME) {
             # if the youngest cached handler is out of date then all cached handlers are out of date
             if($key) {
                 $self->{stack_cached}->{$key} = [];
@@ -198,6 +197,7 @@ sub new {
         dbh       => shift, # dbh
         h       => undef,
         cb        => undef,
+        clock     => time,
         stack_ref => undef,
         key       => shift, # cache key (only for cached sth)
         io        => undef,
@@ -206,20 +206,6 @@ sub new {
     
     croak __PACKAGE__, ": missing or wrong database handler (must be `DBI::db`)"
         unless $self->{dbh} && ref($self->{dbh}) eq 'DBI::db';
-    
-    $self->{io} = AnyEvent->io(
-        fh => $self->{dbh}->mysql_fd,
-        poll => 'r',
-        cb => sub {
-            if ($self->{cb} && $self->{h}) {
-                eval { $self->{cb}->($self->{h}->mysql_async_result, $self->{h}) };
-                carp __PACKAGE__, ": callback error" if $@;
-            } else {
-                carp __PACKAGE__, ": missing callback function or database handler";
-            }
-            $self->DESTROY;
-        }
-    );
     
     bless $self, $class;
 }
@@ -252,6 +238,20 @@ sub catch {
     my $self = shift;
     $self->{stack_ref} = shift;
     $self->{cb} = shift;
+    
+    $self->{io} = AnyEvent->io( # circular reference!
+        fh => $self->{dbh}->mysql_fd,
+        poll => 'r',
+        cb => sub {
+            if ($self->{cb} && $self->{h}) {
+                eval { $self->{cb}->($self->{h}->mysql_async_result, $self->{h}) };
+                carp __PACKAGE__, ": callback error" if $@;
+            } else {
+                carp __PACKAGE__, ": missing callback function or database handler";
+            }
+            $self->{io} = undef; # break the circular reference to destroy the instance
+        }
+    );
     return 1;
 }
 
@@ -265,71 +265,18 @@ sub myclock {
 sub DESTROY {
     my $self = shift;
     
-    if($self->{io}) {
-        $self->{cb} = undef;
-        if($self->{stack_ref}) { # object in use - must be returned in the stack
-            my $stack = $self->{stack_ref};
-            $self->{stack_ref} = undef;
-            $self->myclock(time);
-            $self->{h} = undef unless $self->{key};
-            my $container = Mojolicious::Plugin::AsyncMySQL::Container->new($self);
-            push @$stack, $container;
-            carp "$self->{i} pushed in cache" if $DEBUG;
-        } else { # object in the stack - must be destroyed if the stack is flushed
-            $self->{dbh} = undef;
-            $self->{h} = undef;
-            $self->{io} = undef;
-            carp "$self->{i} ready to be destroyed" if $DEBUG;
-        }
-    } elsif ($DEBUG) {
-        carp "$self->{i} destroyed"
-    }
-    return;
-}
-
-#################################################
-
-package Mojolicious::Plugin::AsyncMySQL::Container;
-
-use strict;
-use warnings;
-
-use Carp;
-
-sub new {
-    my $class = shift;
-    
-    my $self = {
-        clock   => time,
-        handler => shift
-    };
-    
-    bless $self, $class;
-}
-
-sub is_alive {
-    return undef if time - shift->{clock} > $CONNECTION_LIFETIME;
-    return 1;
-}
-
-sub unpack {
-    my $self = shift;
-    
-    unless($self->{handler}) {
-        carp __PACKAGE__, ": unpack empty container";
-        return undef;
-    }
-    
-    my $handler = $self->{handler};
-    $self->{handler} = undef;
-    return $handler;
-}
-
-sub DESTROY {
-    my $self = shift;
-    if(defined $self->{handler}) {
-        $self->{handler}->DESTROY;
-        $self->{handler} = undef;
+    $self->{cb} = undef;
+    if($self->{stack_ref}) { # object in use - must be returned in the stack
+        my $stack = $self->{stack_ref};
+        $self->{stack_ref} = undef;
+        $self->myclock(time);
+        $self->{h} = undef unless $self->{key};
+        push @$stack, $self;
+        carp "$self->{i} pushed in cache" if $DEBUG;
+    } else { # object in the stack - must be destroyed if the stack is flushed
+        $self->{h} = undef;
+        $self->{dbh} = undef;
+        carp "$self->{i} destroyed" if $DEBUG;
     }
     return;
 }
@@ -338,3 +285,203 @@ sub DESTROY {
 
 __END__
 
+
+=encoding utf8
+
+=head1 NAME
+
+Mojolicious::Plugin::AsyncMySQL - Asynchronous MySQL queries
+
+
+=head1 SYNOPSIS
+
+    use Mojolicious::Plugin::AsyncMySQL;
+
+    $dbh = Mojolicious::Plugin::AsyncMySQL->connect(...);
+    
+    my $sql_1 = q{DELETE FROM table_name WHERE column_name_1 = ? AND column_name_2 = ?};
+    my $sql_2 = q{SELECT * FROM table_name ORDER BY column_name_1 LIMIT 1};
+    my $sql_3 = q{SELECT * FROM table_name WHERE column_name_1 = ? AND column_name_2 = ?};
+    
+    my $attr = {...}; # query attributes
+    
+    $dbh->do({
+        sql  => $sql_1,
+        val  => ['foo', 'bar'],
+        attr => $attr,
+        cd   => sub {
+            my ($rv, $dbh) = @_;
+            ...
+        }
+    });
+   
+    $dbh->query({
+        sql => $sql_2,
+        attr => $attr,
+        cd  => sub {
+            my ($rv, $sth) = @_;
+            ...
+        }
+    });
+   
+    $dbh->query_cached({
+        sql => $sql_3,
+        val => ['foo', 'bar'],
+        cd  => sub {
+            my ($rv, $sth) = @_;
+            ...
+        }
+    });
+
+
+=head1 DESCRIPTION
+
+This module is an L<AnyEvent> user, you need to make sure that you use and
+run a supported event loop.
+
+This module implements asynchronous MySQL queries and can be used as a
+Mojolicious plugin. It doesn't spawn any processes.
+
+=head1 INTERFACE 
+
+The API has four methods: connect(), do(), query() and query_cached().
+
+=over
+
+=item connect(...)
+
+This module uses L<DBD::mysql> which support only single asynchronous
+query per MySQL connection. To overcome this limitation provided connect()
+constructor makes a pool of objects constructed by DBI->connect().
+Methods do(), query() and query_cached() reuse only the objects
+which you don't use anymore. The pool size will increase under high load and
+decrease while reducing the load.
+
+=item
+
+$dbh->do({
+    sql  => $sql_statement,
+    val  => [@bind_values],
+    attr => $hash_ref,
+    cd   => sub {
+        my ($rv, $dbh) = @_;
+        ...
+    }
+});
+
+Prepare and execute a single statement like do() method of DBI package,
+but takes the hash reference as an argument. The required hash keys
+are 'sql' and 'cb' associated with the SQL statement and the callback function respectively.
+The hash element 'val' associates with reference to the bind values array and is not required.
+The handle attributes can be set using not requered hash element 'attr'.
+After the statment execution the DBI database handle will returned to callback function.
+
+=item
+
+$dbh->query({
+    sql  => $scalar,
+    val  => [@list],
+    attr => $hash_ref,
+    cd   => sub {
+        my ($rv, $sth) = @_;
+        ...
+    }
+});
+
+This method combines prepare() and execute() DBI methods and returns the DBI statement handle
+to the callback function. It takes the same argument as for do() method.
+
+
+=item
+
+$dbh->query_cached({
+    sql  => $scalar,
+    val  => [@list],
+    attr => $hash_ref,
+    cd   => sub {
+        my ($rv, $sth) = @_;
+        ...
+    }
+});
+
+This method combines prepare() and execute() DBI methods, but prepare() method will executed only ones
+and cached at the separate connection pool. It can spare database server usage.
+The callback function will get the DBI statement handle. 
+
+=back
+
+=head2 SYNCHRONOUS QUERIES
+
+To make synchronous query use usual DBI or Mojolicious::Plugin::Database.
+
+=head1 BUGS AND LIMITATIONS
+
+No bugs have been reported.
+
+=head1 SUPPORT
+
+Please report any bugs or feature requests through the web interface at
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Mojolicious-Plugin-AsyncMySQL>.
+I will be notified, and then you'll automatically be notified of progress
+on your bug as I make changes.
+
+You can also look for information at:
+
+=over
+
+=item * RT: CPAN's request tracker
+
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Mojolicious-Plugin-AsyncMySQL>
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/Mojolicious-Plugin-AsyncMySQL>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/d/Mojolicious-Plugin-AsyncMySQL>
+
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/Mojolicious-Plugin-AsyncMySQL/>
+
+=back
+
+
+=head1 SEE ALSO
+
+L<AnyEvent>, L<DBI>, L<AnyEvent::DBI>, L<AnyEvent::DBI::MySQL>
+
+
+=head1 AUTHOR
+
+Dmitry Malko  C<< <dmitry.malko@cpan.org> >>
+
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright 2014 Dmitry Malko <dmitry.malko@cpan.org>.
+
+This program is distributed under the MIT (X11) License:
+L<http://www.opensource.org/licenses/mit-license.php>
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
