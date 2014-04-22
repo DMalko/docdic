@@ -10,8 +10,9 @@ our $VERSION = '0.3';
 
 my $CONNECTION_LIFETIME = 120; # the max time to reuse the connection (sec)
 my $INSTANCE_NUM = 0;
-
 my $DEBUG = 0;
+
+my %mojo = (); # It uses only for Mojolicious
 
 sub register {
     my $plugin = shift;
@@ -21,13 +22,14 @@ sub register {
     croak __PACKAGE__, ": missing input parameter (must be a hash reference)"
         unless $attr && ref($attr) eq 'HASH';
     croak __PACKAGE__, ": missing helper name"
-        unless exists $attr->{helper};
-    croak __PACKAGE__, ": wrong connection parameters (must be a hash reference)"
-        unless exists $attr->{db} && ref($attr->{db}) eq 'HASH';
+        unless $attr->{helper};
+    croak __PACKAGE__, ": the helper name already exists"
+        if exists $mojo{$attr->{helper}};
     
     #my $server = sub { __PACKAGE__->connect($attr->{db}) };
     my $attr_name = '_asyncmysql_' . $attr->{helper};
-    $app->attr($attr_name => __PACKAGE__->connect($attr->{db}));
+    $mojo{$attr->{helper}} = __PACKAGE__->connect($attr->{dsn}, $attr->{username}, $attr->{password}, $attr->{options});
+    $app->attr($attr_name => sub {return $mojo{$attr->{helper}}});
     $app->helper($attr->{helper} => sub { return shift->app->$attr_name });
 }
 
@@ -270,7 +272,13 @@ sub DESTROY {
         my $stack = $self->{stack_ref};
         $self->{stack_ref} = undef;
         $self->myclock(time);
-        $self->{h} = undef unless $self->{key};
+        
+        unless($self->{key}) {
+            $self->{h} = undef;
+        } elsif(ref($self->{h}) ne ref($self->{dbh})) { # flush the statement handler
+            $self->{h}->finish if defined $self->{h}->fetchrow_array;
+        }
+        
         push @$stack, $self;
         carp "$self->{i} pushed in cache" if $DEBUG;
     } else { # object in the stack - must be destroyed if the stack is flushed
@@ -389,7 +397,7 @@ $dbh->query({
 });
 
 This method combines prepare() and execute() DBI methods and returns the DBI statement handle
-to the callback function. It takes the same argument as for do() method.
+to the callback function. It takes the same argument as do() method.
 
 
 =item
