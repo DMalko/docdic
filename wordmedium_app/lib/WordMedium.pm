@@ -65,17 +65,17 @@ sub startup {
     my $r = $self->routes;
     
     # Normal routes to controller #
-    $r->route('/')->to('home#index');
-    $r->route('/signup')->to('authentication#signup');
-    $r->route('/signin')->to('authentication#signin');
-    $r->route('/signout')->to('authentication#signout');
-    $r->route('/passreset')->to('authentication#passreset');
+    my $auth_bridge = $r->bridge('/')->to('authentication#check');
+    $auth_bridge->route('/')->to('home#index');
+    $auth_bridge->route('/signup')->to('authentication#signup');
+    $auth_bridge->route('/signin')->to('authentication#signin');
+    $auth_bridge->route('/signout')->to('authentication#signout');
+    $auth_bridge->route('/passreset')->to('authentication#passreset');
     
     $r->route('/test')->to('home#test');
     
     # Private routes to controller #
-    my $auth_bridge = $r->bridge('/members')->to('authentication#check');
-    $auth_bridge->route('/myhome')->to('home#myhome');
+    $auth_bridge->route('/members')->to('home#myhome');
     
 }
 
