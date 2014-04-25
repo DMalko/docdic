@@ -1,0 +1,15 @@
+Техническое задание на разработку on-line ресурса WordMedium.
+
+Разделы с puplic-доступом:
+1. Registration
+2. Dictionary
+3. Help
+
+Разделы с private-доступом:
+1. Dictionary
+2. Word grabber
+3. Tutor
+4. Jabber
+5. Progress board (statistics) 
+6. Account properties
+7. Help
