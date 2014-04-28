@@ -76,6 +76,7 @@ sub startup {
     # Private routes to controller #
     my $auth_bridge = $r->bridge('/members')->to('authentication#check');
     $auth_bridge->route('/myhome')->to('home#myhome');
+    $auth_bridge->route('/test1')->to('home#test');
     
 }
 

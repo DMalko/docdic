@@ -6,7 +6,7 @@ use DBI;
 use AnyEvent;
 use Digest::MD5 qw( md5_hex );
 
-our $VERSION = '0.3';
+our $VERSION = '0.4';
 
 my $CONNECTION_LIFETIME = 120; # the max time to reuse the connection (sec)
 my $INSTANCE_NUM = 0;
@@ -65,14 +65,12 @@ sub lifetime {
 # $dbh->do({
 #    sql  => $sql,
 #    val  => [],
-#    attr => $attr,
 #    cd   => $cb
 # });
 #
 # $dbh->query({
 #    sql => $sql,
 #    val => [],
-#    attr => $attr,
 #    cd  => $cb
 # });
 #
@@ -104,20 +102,12 @@ sub query {
     croak __PACKAGE__, ": missing callback function"
         unless exists $args->{cb} && ref($args->{cb}) eq 'CODE';
     
-    my $sth_attr;
-    if(exists $args->{attr}) {
-        if(exists $args->{attr}->{mysql_use_result} || exists $args->{attr}->{mysql_store_result}) { # the attributes of the statement handle
-            $sth_attr->{mysql_use_result} = delete $args->{attr}->{mysql_use_result}; 
-            $sth_attr->{mysql_store_result} = delete $args->{attr}->{mysql_store_result};
-        }
-    }
-    
     my $handler = $self->get_handler($args->{cb});
     
     $args->{attr}->{async} = 1;
     $handler->prepare($args);
     
-    $handler->execute($args->{val}, $sth_attr);
+    $handler->execute($args->{val});
     return 1;
 }
 
@@ -316,7 +306,6 @@ Mojolicious::Plugin::AsyncMySQL - Asynchronous MySQL queries
     $dbh->do({
         sql  => $sql_1,
         val  => ['foo', 'bar'],
-        attr => $attr,
         cd   => sub {
             my ($rv, $dbh) = @_;
             ...
@@ -325,7 +314,7 @@ Mojolicious::Plugin::AsyncMySQL - Asynchronous MySQL queries
    
     $dbh->query({
         sql => $sql_2,
-        attr => $attr,
+        val  => [], # not required
         cd  => sub {
             my ($rv, $sth) = @_;
             ...
@@ -335,6 +324,7 @@ Mojolicious::Plugin::AsyncMySQL - Asynchronous MySQL queries
     $dbh->query_cached({
         sql => $sql_3,
         val => ['foo', 'bar'],
+        attr => $attr, # can be set only for query_cached()
         cd  => sub {
             my ($rv, $sth) = @_;
             ...
@@ -370,7 +360,6 @@ decrease while reducing the load.
 $dbh->do({
     sql  => $sql_statement,
     val  => [@bind_values],
-    attr => $hash_ref,
     cd   => sub {
         my ($rv, $dbh) = @_;
         ...
@@ -380,16 +369,14 @@ $dbh->do({
 Prepare and execute a single statement like do() method of DBI package,
 but takes the hash reference as an argument. The required hash keys
 are 'sql' and 'cb' associated with the SQL statement and the callback function respectively.
-The hash element 'val' associates with reference to the bind values array and is not required.
-The handle attributes can be set using not requered hash element 'attr'.
-After the statment execution the DBI database handle will returned to callback function.
+The hash element 'val' associates with a reference to the bind values array and is not required.
+After the statment execution the DBI database handle will returned to the callback function.
 
 =item
 
 $dbh->query({
     sql  => $scalar,
     val  => [@list],
-    attr => $hash_ref,
     cd   => sub {
         my ($rv, $sth) = @_;
         ...
@@ -414,7 +401,9 @@ $dbh->query_cached({
 
 This method combines prepare() and execute() DBI methods, but prepare() method will executed only ones
 and cached at the separate connection pool. It can spare database server usage.
-The callback function will get the DBI statement handle. 
+The handle attributes can be set using not requered hash element 'attr'. The attributes will be sent to
+prepare() DBI method except 'mysql_use_result' and 'mysql_store_result' which will be applied before calling
+execute() DBI method. The callback function will get the DBI statement handle. 
 
 =back
 
