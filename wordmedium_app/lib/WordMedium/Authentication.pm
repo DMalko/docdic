@@ -13,11 +13,11 @@ my $auth_stash_key   = '__auth__';
 sub check {
     my $self = shift;
     
-    unless(defined $self->session($auth_session_key)) {
-        $self->redirect_to('/');
-        return;
+    if(defined $self->session($auth_session_key)) {
+        $self->redirect_to('/members');
+        return 1;
     }
-    return 1;
+    return;
 }
 
 sub signup {
