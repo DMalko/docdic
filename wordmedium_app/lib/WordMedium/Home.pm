@@ -8,16 +8,17 @@ sub index {
     $self->render_static('index.html');
 }
 
+sub myhome {
+    my $self = shift;
+
+    $self->render(text => "WELCOME!");
+}
+
 sub test {
     my $self = shift;
 
     $self->render(text => "TEST!");
 }
 
-sub myhome {
-    my $self = shift;
-
-    $self->render(text => "WELCOME!");
-}
 
 1;

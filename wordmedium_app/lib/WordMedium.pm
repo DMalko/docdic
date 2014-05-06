@@ -33,6 +33,9 @@ sub startup {
     # Main domain #
     $self->helper(main_domain => sub { return shift->app->config->{main_domain}; });
     
+    # Authentication #
+    $self->plugin('Authentication', { session_key => 'auth', stash_key => '__auth__' });
+    
     # Password generator #
     $self->plugin('RandomPassword', { helper => 'randpass', length => 10 });
     
@@ -65,17 +68,19 @@ sub startup {
     my $r = $self->routes;
     
     # Normal routes to controller #
-    my $auth_bridge = $r->bridge('/')->to('authentication#check');
-    $auth_bridge->route('/')->to('home#index');
-    $auth_bridge->route('/signup')->to('authentication#signup');
-    $auth_bridge->route('/signin')->to('authentication#signin');
-    $auth_bridge->route('/signout')->to('authentication#signout');
-    $auth_bridge->route('/passreset')->to('authentication#passreset');
+    $r->route('/')->to('home#index');
+    $r->route('/signup')->to('members#signup');
+    $r->route('/signin')->to('members#signin');
+    $r->route('/passreset')->to('members#passreset');
+    
+    $r->route('/dictionary/translate')->to('dictionary#translate');
     
     $r->route('/test')->to('home#test');
     
     # Private routes to controller #
-    $auth_bridge->route('/members')->to('home#myhome');
+    my $members_bridge = $r->bridge('/members')->to('members#authenticated');
+    $members_bridge->route('/signout')->to('members#signout');
+    $members_bridge->route('/myhome')->to('home#myhome');
     
 }
 
