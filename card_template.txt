@@ -1,0 +1,32 @@
+keyword => "desert",
+wordforms => ["des·ert", "deserts", "deserting", "deserted"],
+comment => "The noun is pronounced The verb is pronounced and is hyphenated de·sert.",
+definitions => [ # I, II, III
+	{ 
+		pronunciations => [{transcription => "prə,nʌnsɪˈeɪʃ(ə)n", sound => "link_to_audiofile", note => "american"}, ]
+		speechparts => {
+			noun => [
+				{
+					rate => 0.01,
+					translation => "пустыня",
+					synonym => ["plain", ]
+				},
+			],
+			pronoun => [],
+			verb => [],
+			adjective => [],
+			verb => [],
+			adverb => [],
+			preposition => [],
+			conjunction => [],
+			interjection => [],
+			article => [],
+			abbreviation => [],
+			phrase => [],
+			suffix => [],
+			prefix => [],
+		}
+	},
+	
+]
+

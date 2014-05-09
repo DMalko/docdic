@@ -10,7 +10,6 @@ use Mojo::IOLoop::ForkCall;
 sub authenticated {
     my $self = shift;
     
-    #unless (defined $self->session($auth_session_key)) {
     unless ($self->is_authenticated) {
         $self->redirect_to('/');
         return;
@@ -55,7 +54,7 @@ sub signup {
             my $d = shift;
             
             my $end = $d->begin(0);
-            $self->db->query({
+            $self->core->query({
                 sql => q{SELECT uname, email FROM user WHERE uname = ? UNION SELECT uname, email FROM user WHERE email = ?},
                 val => [$uname, $email],
                 cb => sub {
@@ -88,7 +87,7 @@ sub signup {
             
             my $end = $d->begin();
             my $crptpass = $self->bcrypt($pass);
-            $self->db->do({
+            $self->core->do({
                 sql => q{INSERT IGNORE INTO user VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)},
                 val => ['\N', $uname, $email, $crptpass],
                 cb => sub { $end->();}
@@ -98,7 +97,7 @@ sub signup {
             my $d = shift;
             
             my $end = $d->begin(0);
-            $self->db->query({
+            $self->core->query({
                 sql => q{SELECT uid FROM user WHERE uname = ? AND email = ? LIMIT 1}, # `LIMIT 1` to speed up the query
                 val => [$uname, $email],
                 cb => sub {
@@ -110,8 +109,6 @@ sub signup {
                         $end->();
                         return;
                     }
-                    #$self->session($auth_session_key => $uid);
-                    #$self->stash($auth_stash_key => $uid);
                     $self->authenticate($uid);
                     $self->render(json => {redirect => '/members/myhome'});
                     $end->(1);
@@ -141,7 +138,7 @@ sub signin {
     }
     
     $self->render_later;
-    $self->db->query({
+    $self->core->query({
         sql => q{SELECT uid, pass FROM user WHERE uname = ? OR email = ? LIMIT 1}, # `LIMIT 1` to speed up the query
         val => [$uname, $uname],
         cb => sub {
@@ -155,8 +152,6 @@ sub signin {
             }
             
             if($self->bcrypt_validate($upass, $pass)) {
-                #$self->session($auth_session_key => $uid);
-                #$self->stash($auth_stash_key => $uid);
                 $self->authenticate($uid);
                 $self->render(json => {redirect => '/members/myhome'});
             } else {
@@ -170,10 +165,7 @@ sub signin {
 
 sub signout {
     my $self = shift;
-
-    #$self->session(expires => 1);
-    #delete $self->stash->{$auth_stash_key};
-    #delete $self->session->{$auth_session_key};
+    
     $self->logout;
     $self->redirect_to('/');
     return 1;
@@ -196,7 +188,7 @@ sub passreset {
         sub { # check the user
             my $d = shift;
             my $end = $d->begin(0);
-            $self->db->query({
+            $self->core->query({
                 sql => q{SELECT uid FROM user WHERE email = ?},
                 val => [$email],
                 cb => sub {
@@ -218,7 +210,7 @@ sub passreset {
             my $new_password = $self->randpass();
             #$self->app->log->debug("email: $email => new password: $new_password\n");
             my $crptpass = $self->bcrypt($new_password);
-            $self->db->do({
+            $self->core->do({
                 sql => q{UPDATE user SET pass = ? WHERE uid = ?},
                 val => [$crptpass, $uid],
                 cb => sub {

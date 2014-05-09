@@ -40,15 +40,16 @@ sub register {
         return $self->session($attr->{session_key});
     });
     
-    $app->hook(before_dispatch => sub {
-        my $self = shift;
-        
-        if (defined $self->session($attr->{session_key})) {
-            my $uid = $self->session($attr->{session_key});
-            $self->stash($attr->{stash_key} => $uid);
-        }
-        return 1;
-    });
+#### !!!! is the hook helpful?
+#    $app->hook(before_dispatch => sub {
+#        my $self = shift;
+#        
+#        if (defined $self->session($attr->{session_key})) {
+#            my $uid = $self->session($attr->{session_key});
+#            $self->stash($attr->{stash_key} => $uid);
+#        }
+#        return 1;
+#    });
 }
 
 

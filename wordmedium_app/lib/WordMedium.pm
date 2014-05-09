@@ -46,10 +46,19 @@ sub startup {
     $self->plugin('SMTP', { helper => 'smtp_ssl', server => $config->{smtp_server} });
     
     # Database access #
-    my $dbcore = $config->{dbcore};
+    my $dbcore = $config->{db_core}; # core
+    my $dbdict = $config->{db_dict}; # dictionaries
     
-    $self->plugin('database', {
-        helper   => 'sync_db',
+#    $self->plugin('database', {
+#        helper   => 'sync_db',
+#        dsn      => join(':', @$dbcore{qw{schima driver name host port}}),
+#        username => $dbcore->{user},
+#        password => $dbcore->{pass},
+#        options  => {RaiseError => 0, AutoCommit => 1, mysql_enable_utf8 => 1}
+#    });
+    
+    $self->plugin('AsyncMySQL', {
+        helper   => 'core',
         dsn      => join(':', @$dbcore{qw{schima driver name host port}}),
         username => $dbcore->{user},
         password => $dbcore->{pass},
@@ -57,10 +66,10 @@ sub startup {
     });
     
     $self->plugin('AsyncMySQL', {
-        helper   => 'db',
-        dsn      => join(':', @$dbcore{qw{schima driver name host port}}),
-        username => $dbcore->{user},
-        password => $dbcore->{pass},
+        helper   => 'dict',
+        dsn      => join(':', @$dbdict{qw{schima driver name host port}}),
+        username => $dbdict->{user},
+        password => $dbdict->{pass},
         options  => {RaiseError => 0, AutoCommit => 1, mysql_enable_utf8 => 1}
     });
     
