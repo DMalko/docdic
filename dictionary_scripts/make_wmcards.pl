@@ -51,37 +51,47 @@ $dbh_wm->do(q/
   ) ENGINE=MyISAM DEFAULT CHARSET=utf8
 /);
 
-#$dbh_dic->do(q/CREATE TABLE IF NOT EXISTS `tmp_google` (
-$dbh_dic->do(q/CREATE TEMPORARY TABLE `tmp_google` (
+$dbh_dic->do('DROP TABLE IF EXISTS `tmp_google`') if $clean;
+$dbh_dic->do(q/CREATE TABLE IF NOT EXISTS `tmp_google` (
   `trn_id` int(11) NOT NULL,
   `keyword_id` int(11) DEFAULT NULL,
   `type` char(32) DEFAULT NULL,
   `translation` char(128) DEFAULT NULL,
   `score` float DEFAULT NULL,
+  `keyword` varchar(128) DEFAULT NULL,
   `record_num` int(3) DEFAULT NULL,
   `transcription` char(128) DEFAULT NULL,
   KEY (`trn_id`),
+  KEY `keyword` (`keyword`),
   KEY `keyword_id` (`keyword_id`),
   KEY `translation` (`translation`)
 ) DEFAULT CHARSET=utf8
-SELECT t3.*, record_num, transcription
+SELECT t3.*, keyword, record_num, transcription
 FROM dic_google_basic AS t1 INNER JOIN dic_lingvo_basic AS t2 USING(keyword)
 INNER JOIN dic_google_trn AS t3 ON t1.keyword_id = t3.keyword_id
 INNER JOIN dic_lingvo_group AS t4 ON t2.keyword_id = t4.keyword_id
-LEFT JOIN word_rank_gutenberg AS t5 ON t1.keyword = t5.word
-LEFT JOIN word_rank_ccae AS t6 ON t1.keyword = t6.word
-WHERE keyword IS NOT NULL AND 
-(t4.translation REGEXP t3.translation OR t5.word IS NOT NULL OR t6.word IS NOT NULL)
-GROUP BY trn_id, record_num
+WHERE keyword IS NOT NULL AND t4.translation REGEXP t3.translation
+GROUP BY trn_id, record_num 
+/);
+$dbh_dic->do(q/
+INSERT INTO tmp_google
+SELECT t2.*, t1.keyword, 0 AS record_num, transcription
+FROM dic_google_basic AS t1 INNER JOIN dic_google_trn AS t2 USING(keyword_id)
+LEFT JOIN word_rank_gutenberg AS t3 ON t1.keyword = t3.word
+LEFT JOIN word_rank_ccae AS t4 ON t1.keyword = t4.word
+LEFT JOIN tmp_google AS t5 ON t1.keyword = t5.keyword
+WHERE t1.keyword IS NOT NULL AND (t3.word IS NOT NULL OR t4.word IS NOT NULL) AND
+t5.keyword IS NULL
+GROUP BY trn_id
 /);
 
 my $load = $dbh_wm->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `card` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
 
 my $select_kw = $dbh_dic->prepare(q/SELECT t1.* FROM dic_google_basic AS t1 INNER JOIN tmp_google AS t2 USING(keyword_id) GROUP BY keyword_id ORDER BY keyword_id/);
-my $select_trn_num = $dbh_dic->prepare(q/SELECT DISTINCT record_num FROM tmp_google WHERE keyword_id = ?/);
-my $select_trn = $dbh_dic->prepare(q/SELECT * FROM tmp_google WHERE keyword_id = ? AND record_num = ?/);
-my $select_tscr = $dbh_dic->prepare(q/SELECT DISTINCT transcription FROM tmp_google WHERE keyword_id = ? AND record_num = ?/);
-my $select_rtrn = $dbh_dic->prepare(q/SELECT rtranslation FROM dic_google_rtrn WHERE trn_id = ?/);
+my $select_trn_num = $dbh_dic->prepare(q/SELECT DISTINCT record_num FROM tmp_google WHERE keyword_id = ? ORDER BY record_num/);
+my $select_trn = $dbh_dic->prepare(q/SELECT trn_id, type, translation, score FROM tmp_google WHERE keyword_id = ? AND record_num = ? ORDER BY keyword_id, record_num/);
+my $select_tscr = $dbh_dic->prepare(q/SELECT DISTINCT transcription FROM tmp_google WHERE keyword_id = ? AND record_num = ? ORDER BY trn_id/);
+my $select_rtrn = $dbh_dic->prepare(q/SELECT rtranslation FROM dic_google_rtrn WHERE trn_id = ? ORDER BY rtrn_id/);
 
 my $select_wf = $dbh_dic->prepare(q/SELECT wordform, also_use FROM dic_collins_basic INNER JOIN dic_collins_form USING(keyword_id) WHERE keyword = ? ORDER BY form_id/);
 
@@ -107,7 +117,7 @@ while(my ($kw_id, $kw, $trn, $s, $t) = $select_kw->fetchrow_array()) {
     while(my ($record_num) = $select_trn_num->fetchrow_array()) {
         my %speechparts = ();
         $select_trn->execute($kw_id, $record_num);
-        while(my ($trn_id, $foo, $type, $tran, $score) = $select_trn->fetchrow_array()) {
+        while(my ($trn_id, $type, $tran, $score) = $select_trn->fetchrow_array()) {
             my @syn = ();
             $select_rtrn->execute($trn_id);
             while(my ($rtran) = $select_rtrn->fetchrow_array()) {
@@ -146,7 +156,7 @@ while(my ($kw_id, $kw, $trn, $s, $t) = $select_kw->fetchrow_array()) {
 }
 $tmp->close;
 $load->execute($tmp);
-#$dbh_dic->do(q/DROP TABLE `tmp_google`/);
+$dbh_dic->do(q/DROP TABLE `tmp_google`/);
 
 print "...done\n";
 
