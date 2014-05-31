@@ -82,6 +82,7 @@ sub startup {
     $r->route('/signin')->to('members#signin');
     $r->route('/passreset')->to('members#passreset');
     
+    $r->route('/dictionary/body')->to('dictionary#body');
     $r->route('/dictionary/translate')->to('dictionary#translate');
     
     $r->route('/test')->to('home#test');

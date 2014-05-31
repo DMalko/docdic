@@ -2,6 +2,10 @@ package WordMedium::Dictionary;
 
 use Mojo::Base 'Mojolicious::Controller';
 
+sub body {
+    
+}
+
 sub translate {
     my $self = shift;
     
