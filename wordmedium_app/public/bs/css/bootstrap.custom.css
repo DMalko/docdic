@@ -1,3 +1,6 @@
+body { padding-top: 70px; }
+body { padding-bottom: 70px; }
+
 .panel-primary > .panel-heading a {
   color: inherit;
 }
@@ -93,4 +96,8 @@ fieldset[disabled] .btn-green.active {
 
 .text-grey {
   color: #8A8A8A;
+}
+
+.text-green {
+  color: #5DAB0F;
 }
