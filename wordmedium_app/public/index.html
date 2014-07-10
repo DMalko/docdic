@@ -38,7 +38,8 @@
     <div class="container">
       <div class="row">
         <div class="col-sm-12 col-md-12">
-          <!-- --------------------------------- Begin of Navbar --------------------------------- -->
+	  
+          <!-- Begin of Navbar -->
           <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
             <div class="container">
               <!-- Brand and toggle get grouped for better mobile display -->
@@ -76,20 +77,16 @@
               </div><!-- /.navbar-collapse -->
             </div><!-- /.container-fluid -->
           </nav>
-          <!-- ---------------------------------- End of Navbar ---------------------------------- -->
-          
+          <!-- End of Navbar -->
+	  
         </div>
       </div>
+      
       <div class="row">
-        
-        <!-- ---------------------------------- Begin of Sign ---------------------------------- -->
         <div class="col-sm-4 col-md-3">
-		<!--div class="panel panel-default">
-			<div class="panel-body">
-			  <img src="img/wmlogo.jpg" style="width: 100%; height: auto;"/>
-			</div>
-		</div-->
-          <img src="img/wmlogo.jpg" style="width: 100%; height: auto; margin-bottom: 20px"/>
+	  
+	  <!-- Begin of Sign -->
+          <img src="img/wmlogo.jpg" alt="" style="width: 100%; height: auto; margin-bottom: 20px">
           <div class="sign panel-group" id="accordion">
             <div class="panel panel-green">
               <div class="panel-heading">
@@ -156,20 +153,22 @@
               </div>
             </div>
           </div>
+	  <!-- End of Sign -->
+	  
         </div>
-        <!-- ----------------------------------- End of Sign ----------------------------------- -->
         
-        <!-- ---------------------------------- Begin of Dict ---------------------------------- -->
+        
+        <!-- Begin of Dict -->
         <div class="dict col-sm-8 col-md-9">
           <div class="panel panel-default">
             <div class="panel-heading clearfix">
               <div class="panel-title pull-left">
                 <span class="glyphicon glyphicon-book text-primary"></span> Dictionary
               </div>
-              <div class="btn-group pull-right" style="margin: -6px 0 -6px 0">
-                <div class="btn-group">
+              <div id="lang_panel" class="btn-group pull-right" style="margin: -6px 0 -6px 0">
+                <div class="btn-group select-group">
                   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    English
+                    <span id="trn_from" class="select-legend">English</span>
                     <span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu" role="menu">
@@ -179,14 +178,14 @@
                   </ul>
                 </div>
                 <div class="btn-group">
-                  <button type="button" class="btn btn-primary">&nbsp;&#8646;&nbsp;</button>
+                  <button id="swapper" type="button" class="btn btn-primary">&nbsp;&#8646;&nbsp;</button>
                 </div>
-                <div class="btn-group">
+                <div class="btn-group select-group">
                   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    Russian
+                    <span id="trn_to" class="select-legend">Russian</span>
                     <span class="caret"></span>
                   </button>
-                  <ul class="dropdown-menu" role="menu">
+                  <ul class="dropdown-menu pull-right" role="menu"><!-- 'pull-right' is IMPORTANT! -->
                     <li><a href="#">English</a></li>
                       <li class="divider"></li>
                       <li><a href="#">Russian</a></li>
@@ -206,134 +205,80 @@
                       </span>
                     </div>
                   </form>
-                </p>  
+                </p>
               </div>
-              
-              <div class="hidden">
-              <!--
-              <nav class="navbar navbar-default" role="navigation">
-                <div class="container-fluid">
-                  <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-translate">
-                      <span class="sr-only">Toggle navigation</span>
-                      <span class="icon-bar"></span>
-                      <span class="icon-bar"></span>
-                      <span class="icon-bar"></span>
-                    </button>
-                    <div class="visible-xs">
-                      <b class="navbar-brand glyphicon glyphicon-search"></b>
-                      <b class="navbar-brand">Find translation</b>
-                    </div>
-                  </div>
-                  
-                  <div class="collapse navbar-collapse" id="navbar-translate">
-                    <ul class="nav navbar-nav">
-                      <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">English <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                          <li><a href="#">English</a></li>
-                          <li class="divider"></li>
-                          <li><a href="#">Russian</a></li>
-                        </ul>
-                      </li>
-                      <li class="active"><a href="#" style="background-color: #BABABA;">&nbsp;<span style="font-size: 20px; color: #ffffff">&#8646;</span>&nbsp;</a></li>
-                      <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Russian <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                          <li><a href="#">English</a></li>
-                          <li class="divider"></li>
-                          <li><a href="#">Russian</a></li>
-                        </ul>
-                      </li>
-                    </ul>
-                    <form class="navbar-form navbar-righ" role="search">
-                      <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Word or phrase">
-                        <span class="input-group-btn">
-                          <button class="btn btn-primary" type="button">Translate</button>
-                        </span>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              </nav>-->
-                
-              <p class="text-center" style="margin: 10px 0px 10px 0px;"><b>word or phrase</b></p>
-                
-              <!-- Nav tabs -->
-              <ul class="nav nav-tabs" id="myTab">
-                <li class="pull-right active"><a href="#home" data-toggle="tab">wordCard</a></li>
-                <li class="pull-right"><a href="#profile" data-toggle="tab">Lingvo</a></li>
-                <li class="pull-right"><a href="#messages" data-toggle="tab">Collins</a></li>
-              </ul>
-                
-              <!-- Tab panes -->
-              <div class="tab-content">
-                <div class="tab-pane active" id="home"><div style='margin-top: 10px;'>wm</div></div>
-                <div class="tab-pane" id="profile"><div style='margin-top: 10px;'>lingvo</div></div>
-                <div class="tab-pane" id="messages"><div style='margin-top: 10px;'>collins</div></div>
-              </div>
-              </div>
+	      <div class="hide"><!-- Begin of Tab panel -->
+		<p class="text-center" style="margin: 10px 0px 10px 0px;"><b>word or phrase</b></p>
+		  
+		<!-- Nav tabs -->
+		<ul class="nav nav-tabs" id="myTab">
+		  <li class="pull-right active"><a href="#dict1" data-toggle="tab">wordCard</a></li>
+		  <li class="pull-right"><a href="#dict2" data-toggle="tab">Lingvo</a></li>
+		  <li class="pull-right"><a href="#dict3" data-toggle="tab">Collins</a></li>
+		</ul>
+		  
+		<!-- Tab panes -->
+		<div class="tab-content">
+		  <div class="tab-pane active" id="dict1"><div style='margin-top: 10px;'>wm</div></div>
+		  <div class="tab-pane" id="dict2"><div style='margin-top: 10px;'>lingvo</div></div>
+		  <div class="tab-pane" id="dict3"><div style='margin-top: 10px;'>collins</div></div>
+		</div>
+	      </div><!-- End of Tab panel -->
             </div>
-            
-        </div>
-        <!-- ----------------------------------- End of Dict ----------------------------------- -->
-        <!--div class="panel panel-default">
-          <div class="panel-body">
-            <dl class="dl-horizontal">
-              <dt>Dictionary</dt>
-              <dd>Make lessons based on your search history.</dd>
-              <dt>WordGrabber</dt>
-              <dd>Grab words from any text to analyse which words is unknown to you and make lessons.</dd>
-              <dt>Lessons</dt>
-              <dd>Improve and expand your vocabulary</dd>
-              <dt>Tests</dt>
-              <dd>Examine your knowledge.</dd>
-              <dt>Community</dt>
-              <dd>Make friends to learn together.</dd>
-            </dl>
-          </div>
-        </div-->
-        <!--div class="jumbotron" style="background-image: url(img/e-learning1.jpg); background-size: 100%;"-->
-        <div class="jumbotron" style="background: #fff">
-          <h1>
-            <small class="text-primary">&#60;easy learning a foreign language&#62;</small>
-          </h1>
-          <h4><dl class="dl-horizontal">
-              <dt>Dictionary</dt>
-              <dd>Make lessons based on your dictionary search history</dd>
-              <dt>WordGrabber</dt>
-              <dd>Grab unknown words from sites, ebooks and films to make lessons</dd>
-              <dt>Lessons</dt>
-              <dd>Improve and expand your vocabulary</dd>
-              <dt>Tests</dt>
-              <dd>Examine your knowledge</dd>
-              <dt>Community</dt>
-              <dd>Make friends to learn together</dd>
-            </dl></h4>
-          <p>
-            <a class="btn btn-primary btn-lg" role="button">Learn more</a>
-            <span style="float: right;"><img src="img/books.jpg"/></span>
-            <div class="clearfix"></div>
-          </p>
-          
+	  </div>
+	</div>
+        <!-- End of Dict -->
+	
+        <div class="col-sm-8 col-md-9">
+	  <div class="jumbotron" style="background: #fff">
+	    <h1 style="line-height: 0.6em;">
+	      <small class="text-primary">&#60;easy learning a&nbsp;foreign language&#62;</small>
+	    </h1>
+	    <br>
+	    <h4>
+	      <dl class="dl-horizontal">
+		<dt>Dictionary</dt>
+		<dd>Make lessons based on your dictionary search history</dd>
+		<dt>WordGrabber</dt>
+		<dd>Grab unknown words from sites, ebooks and films to make lessons</dd>
+		<dt>Lessons</dt>
+		<dd>Improve and expand your vocabulary</dd>
+		<dt>Tests</dt>
+		<dd>Examine your knowledge</dd>
+		<dt>Community</dt>
+		<dd>Make friends to learn together</dd>
+	      </dl>
+	    </h4>
+	    <p>
+	      <a class="btn btn-primary btn-lg" role="button">Learn more</a>
+	      <span style="float: right;"><img src="img/books.jpg" alt=""></span>
+	      <div class="clearfix"></div><!-- don't remove! -->
+	    </p>
+	  </div>
         </div>
       </div>
-    
-    
-      <div class="dict col-sm-12 col-md-12">
-        <div class="panel panel-default">
-          <div class="panel-body">
-            <div class="text-center text-muted">&copy; WordMedium 2014</div>
-          </div>
-        </div>
+
+      <div class="row">
+	<div class="dict col-sm-12 col-md-12">
+	  
+	  <!-- Begin of Footer -->
+	  <div class="panel panel-default">
+	    <div class="panel-body">
+	      <div class="text-center text-muted">&copy; WordMedium 2014</div>
+	    </div>
+	  </div>
+	  <!-- End of Footer -->
+	  
+	</div>
+      </div>
+      
     </div>
-
-
+    
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="bs/js/bootstrap.min.js"></script>
+    <script src="bs/js/bootstrap.custom.js"></script>
     <script>
       $('#myTab a').click(function (e) {
         e.preventDefault()
