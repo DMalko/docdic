@@ -8,7 +8,7 @@
 
     <!-- Bootstrap -->
     <link href="bs/css/bootstrap.min.css" rel="stylesheet">
-    <link href="bs/css/bootstrap.custom.css" rel="stylesheet">
+    <link href="css/bootstrap.custom.css" rel="stylesheet">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -16,22 +16,6 @@
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-
-    <style>
-      /* CSS used here will be applied after bootstrap.css */
-      .panel a {
-        color:#777;
-      }
-      
-      .panel a:hover {
-       text-decoration:none;
-       color:#222;
-      }
-      
-      .panel .table td {
-       border-color: #f3f3f3;
-      }
-    </style>
     
   </head>
   <body>
@@ -88,32 +72,44 @@
 	  <!-- Begin of Sign -->
           <img src="img/wmlogo.jpg" alt="" style="width: 100%; height: auto; margin-bottom: 20px">
           <div class="sign panel-group" id="accordion">
-            <div class="panel panel-green">
+            <!-- begin of signup panel --> 
+	    <div class="panel panel-green">
               <div class="panel-heading">
                 <h4 class="panel-title">
                   <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne"> Create an account</a>
                 </h4>
               </div>
               <div id="collapseOne" class="panel-collapse collapse">
-                <div class="panel-body">
-                  <div style="margin-bottom:10px;">
-                    <input type="text" class="form-control" placeholder="User name">
-                  </div>
-                  <div style="margin-bottom:10px;">
-                    <input type="text" class="form-control" placeholder="Email">
-                  </div>
-                  <div style="margin-bottom:10px;">
-                    <input type="text" class="form-control" placeholder="Password">
-                  </div>
-                  <div style="margin-bottom:10px;">
-                    <input type="text" class="form-control" placeholder="Retype password">
-                  </div>
-                  <div style="margin-bottom:10px;">
-                    <button type="button" class="btn btn-green">Sign up</button>
-                  </div>
+                <div class="panel-body signupbar">
+		  <form role="form" name="signup" action="/signup" method="post" data-autosubmit="1">
+		    <!-- begin of honey spot -->
+		    <input type="text" id="signup_hs" name="hs_email" class="hide">
+		    <!-- end of honey spot -->
+		    <div style="margin-bottom:10px;">
+		      <input type="text" id="signup_uname" name="uname" maxlength="20" class="form-control" placeholder="User name">
+		    </div>
+		    <div style="margin-bottom:10px;">
+		      <input type="text" id="signup_email" name="email" autocomplete="off" class="form-control" placeholder="Email">
+		    </div>
+		    <div style="margin-bottom:10px;">
+		      <input type="password" id="signup_pass" name="pass" class="form-control" placeholder="Password">
+		    </div>
+		    <div style="margin-bottom:10px;">
+		      <input type="password" id="signup_repass" name="repass" class="form-control" placeholder="Retype password">
+		    </div>
+		    <div style="margin-bottom:10px;">
+		      <button type="submit" class="btn btn-green">Sign up</button>
+		    </div>
+		    <div class="alert alert-dismissible alert-info hide" role="alert">
+		      <!--button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span></button-->
+		      <span class="alert-message">Form message</span>
+		    </div>
+		  </form>
                 </div>
               </div>
             </div>
+	    <!-- end of signup panel -->
+	    <!-- begin of signin panel -->
             <div class="panel panel-primary">
               <div class="panel-heading">
                 <h4 class="panel-title">
@@ -121,19 +117,30 @@
                 </h4>
               </div>
               <div id="collapseThree" class="panel-collapse collapse in">
-                <div class="panel-body">
-                  <div style="margin-bottom:10px;">
-                    <input type="text" class="form-control" placeholder="User name or email">
-                  </div>
-                  <div class="input-group" style="margin-bottom:10px;">
-                    <input type="password" class="form-control" placeholder="Password">
-                    <span class="input-group-btn">
-                      <button type="button" class="btn btn-primary">Sign in</button>
-                    </span>
-                  </div>
+                <div class="panel-body signinbar">
+		  <form role="form" name="signin" action="/signin" method="post" data-autosubmit="1">
+		    <!-- begin of honey spot -->
+		    <input type="text" id="signin_hs" class="hide" name="hs_email">
+		    <!-- end of honey spot -->
+		    <div style="margin-bottom:10px;">
+		      <input type="text" id="signin_uname" name="uname" maxlength="20" class="form-control" placeholder="User name or email">
+		    </div>
+		    <div class="input-group" style="margin-bottom:10px;">
+		      <input type="password" id="signin_pass" name="pass" class="form-control" placeholder="Password">
+		      <span class="input-group-btn">
+			<button type="submit" class="btn btn-primary">Sign in</button>
+		      </span>
+		    </div>
+		    <div class="alert alert-dismissible alert-info hide" role="alert">
+		      <!--button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span></button-->
+		      <span class="alert-message">Form message</span>
+		    </div>
+		  </form>
                 </div>
               </div>
             </div>
+	    <!-- end of signin panel -->
+	    <!-- begin of passreset panel -->
             <div class="panel panel-grey">
               <div class="panel-heading">
                 <h4 class="panel-title">
@@ -141,17 +148,27 @@
                 </h4>
               </div>
               <div id="collapseTwo" class="panel-collapse collapse">
-                <div class="panel-body">
-                  <div class="text-grey" style="margin-bottom:10px;">Send password reset email</div>
-                  <div class="input-group" style="margin-bottom:10px;">
-                    <input type="text" class="form-control" placeholder="Your email">
-                    <span class="input-group-btn">
-                      <button type="button" class="btn btn-primary">Send</button>
-                    </span>
-                  </div>
+                <div class="panel-body passresetbar">
+		  <form role="form" name="passreset" action="/passreset" method="post" data-autosubmit="1">
+		    <div class="text-grey" style="margin-bottom:10px;">Send password reset email</div>
+		    <!-- begin of honey spot -->
+		    <input type="text" id="passreset_hs" class="hide" name="hs_email">
+		    <!-- end of honey spot -->
+		    <div class="input-group" style="margin-bottom:10px;">
+		      <input type="text"  id="passreset_name" name="email" class="form-control" placeholder="Your email">
+		      <span class="input-group-btn">
+			<button type="submit" class="btn btn-primary">Send</button>
+		      </span>
+		    </div>
+		    <div class="alert alert-dismissible alert-info hide" role="alert">
+		      <!--button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span></button-->
+		      <span class="alert-message">Form message</span>
+		    </div>
+		  </form>
                 </div>
               </div>
             </div>
+	    <!-- end of passreset panel -->
           </div>
 	  <!-- End of Sign -->
 	  
@@ -178,7 +195,7 @@
                   </ul>
                 </div>
                 <div class="btn-group">
-                  <button id="swapper" type="button" class="btn btn-primary">&nbsp;&#8646;&nbsp;</button>
+                  <button id="swapper" type="button" class="btn btn-primary" role="button">&nbsp;&#8646;&nbsp;</button>
                 </div>
                 <div class="btn-group select-group">
                   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
@@ -207,11 +224,13 @@
                   </form>
                 </p>
               </div>
-	      <div class="hide"><!-- Begin of Tab panel -->
+	      
+	      <!-- Begin of Tab panel -->
+	      <div class="hide">
 		<p class="text-center" style="margin: 10px 0px 10px 0px;"><b>word or phrase</b></p>
 		  
 		<!-- Nav tabs -->
-		<ul class="nav nav-tabs" id="myTab">
+		<ul class="nav nav-tabs" id="dictab">
 		  <li class="pull-right active"><a href="#dict1" data-toggle="tab">wordCard</a></li>
 		  <li class="pull-right"><a href="#dict2" data-toggle="tab">Lingvo</a></li>
 		  <li class="pull-right"><a href="#dict3" data-toggle="tab">Collins</a></li>
@@ -223,7 +242,9 @@
 		  <div class="tab-pane" id="dict2"><div style='margin-top: 10px;'>lingvo</div></div>
 		  <div class="tab-pane" id="dict3"><div style='margin-top: 10px;'>collins</div></div>
 		</div>
-	      </div><!-- End of Tab panel -->
+	      </div>
+	      <!-- End of Tab panel -->
+	      
             </div>
 	  </div>
 	</div>
@@ -278,13 +299,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="bs/js/bootstrap.min.js"></script>
-    <script src="bs/js/bootstrap.custom.js"></script>
-    <script>
-      $('#myTab a').click(function (e) {
-        e.preventDefault()
-        $(this).tab('show')
-      })
-    </script>
+    <script src="js/bootstrap.custom.js"></script>
   </body>
 </html>
 

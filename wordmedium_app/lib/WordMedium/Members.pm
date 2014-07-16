@@ -147,7 +147,7 @@ sub signin {
             $sth->finish();
             
             unless ($uid) {
-                $self->render(json => {msg => 'Wrong 1user name or password.', msgtype => 'error'});
+                $self->render(json => {msg => 'Wrong user name or password.', msgtype => 'error'});
                 return;
             }
             
@@ -155,7 +155,7 @@ sub signin {
                 $self->authenticate($uid);
                 $self->render(json => {redirect => '/members/myhome'});
             } else {
-                $self->render(json => {msg => 'Wrong user name or 1password.', msgtype => 'error'});
+                $self->render(json => {msg => 'Wrong user name or password.', msgtype => 'error'});
             }
         }
     });
