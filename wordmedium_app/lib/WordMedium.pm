@@ -82,8 +82,7 @@ sub startup {
     $r->route('/signin')->to('members#signin');
     $r->route('/passreset')->to('members#passreset');
     
-    $r->route('/dictionary/body')->to('dictionary#body');
-    $r->route('/dictionary/translate')->to('dictionary#translate');
+    $r->route('/translate')->to('dictionary#translate');
     
     $r->route('/test')->to('home#test');
     
@@ -91,6 +90,7 @@ sub startup {
     my $members_bridge = $r->bridge('/members')->to('members#authenticated');
     $members_bridge->route('/signout')->to('members#signout');
     $members_bridge->route('/myhome')->to('home#myhome');
+    $members_bridge->route('/translate')->to('dictionary#translate');
     
 }
 
