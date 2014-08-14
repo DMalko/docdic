@@ -8,7 +8,11 @@ use JSON::XS;
 use Encode;
 use File::Temp;
 
-###################################
+####################################################
+my $dictionary_name    = 'WordMedium Dictionary';
+my $dictionary_version = '1.0';
+my $dictionary_alias   = 'WordMedium';
+
 my $clean = 1; # DROP TABLE source : 1 = yes, 0 = no
 
 # dictionary db
@@ -21,7 +25,7 @@ my $db_name_wm = 'wm_dict';
 my $host_wm = 'localhost';
 my $login_wm = 'root';
 my $password_wm = '';
-###################################
+###################################################
 
 # the ordered list of speech parts
 my $sp = {
@@ -38,16 +42,16 @@ $dbh_wm->do(q/
     `card_id` int(11) NOT NULL AUTO_INCREMENT,
     `keyword` varchar(128) DEFAULT NULL,
     `body` text,
-    `source` char(2) DEFAULT NULL,
-    `target` char(2) DEFAULT NULL,
+    `source` varchar(3) DEFAULT NULL,
+    `target` varchar(3) DEFAULT NULL,
     `dictionary` varchar(64) DEFAULT NULL,
-    `author_uid` int(11) DEFAULT NULL,
+    `version` varchar(11) DEFAULT NULL,
+    `alias` varchar(11) DEFAULT NULL,
     `like` int(11) NOT NULL DEFAULT '0',
     `error` int(11) NOT NULL DEFAULT '0',
     `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`card_id`),
-    KEY `keyword` (`keyword`,`source`),
-    KEY `author_uid` (`author_uid`)
+    KEY `keyword` (`keyword`,`source`, `target`, `alias`)
   ) ENGINE=MyISAM DEFAULT CHARSET=utf8
 /);
 
@@ -104,7 +108,7 @@ while(my ($kw_id, $kw, $trn, $s, $t) = $select_kw->fetchrow_array()) {
     my @card = ();
     $card[0] = $kw; # keyword
     $card[1] = [];  # wordforms
-    $card[2] = [];  # alsouse's
+    $card[2] = [];  # also_use's
     $card[3] = '';  # comment
         
     $select_wf->execute($kw);
@@ -129,7 +133,7 @@ while(my ($kw_id, $kw, $trn, $s, $t) = $select_kw->fetchrow_array()) {
         }
         # speech parts sorting
         my @speechparts = ();
-        for my $sp (@{$sp->{en}}) {
+        for my $sp (@{$sp->{en}}) { # for English
             if(exists $speechparts{$sp}) {
                push @speechparts, [$sp, $speechparts{$sp}]; # [speechpart, [records]]
                delete $speechparts{$sp};
@@ -145,18 +149,18 @@ while(my ($kw_id, $kw, $trn, $s, $t) = $select_kw->fetchrow_array()) {
         while(my ($tscr) = $select_tscr->fetchrow_array()) {
             push @pronunciations, [$tscr, $kw, '']; # [transcription, sound, note]
         }
-        $definitions[0] = \@pronunciations; # pronunciations
-        $definitions[1] = \@speechparts; # speechparts
+        #$definitions[0] = \@pronunciations; # pronunciations
+        #$definitions[1] = \@speechparts; # speechparts
+        push @definitions, [\@pronunciations, \@speechparts]; # [[pronunciations], [speechparts]]
     }
     die "ERROR: no speechpart definitions - $kw\n" unless @definitions;
-    $card[4] = \@definitions;
+    $card[4] = \@definitions; # definitions
     
     my $json = Encode::decode('utf8', encode_json \@card);
-    $tmp->print(join("\r", '\N', $kw, $json, $s, $t, 'wmdict', '\N', 0, 0), "\r\r");
+    $tmp->print(join("\r", '\N', $kw, $json, $s, $t, $dictionary_name, $dictionary_version, $dictionary_alias, 0, 0), "\r\r");
 }
 $tmp->close;
 $load->execute($tmp);
 $dbh_dic->do(q/DROP TABLE `tmp_google`/);
 
 print "...done\n";
-

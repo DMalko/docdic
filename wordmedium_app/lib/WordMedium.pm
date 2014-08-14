@@ -87,10 +87,10 @@ sub startup {
     $r->route('/test')->to('home#test');
     
     # Private routes to controller #
-    my $members_bridge = $r->bridge('/members')->to('members#authenticated');
-    $members_bridge->route('/signout')->to('members#signout');
-    $members_bridge->route('/myhome')->to('home#myhome');
-    $members_bridge->route('/translate')->to('dictionary#translate');
+    my $members = $r->bridge('/members')->to('members#authenticated');
+    $members->route('/signout')->to('members#signout');
+    $members->route('/myhome')->to('home#myhome');
+    $members->route('/translate')->to('users#groups')->route->to('dictionary#translate');
     
 }
 

@@ -71,17 +71,17 @@
 	  
 	  <!-- Begin of Sign -->
           <img src="img/wmlogo.jpg" alt="" style="width: 100%; height: auto; margin-bottom: 20px">
-          <div id="sign_accordion" class="panel-group">
+          <div class="sign panel-group" id="accordion">
             <!-- begin of signup panel --> 
 	    <div class="panel panel-green">
               <div class="panel-heading">
                 <h4 class="panel-title">
-                  <a data-toggle="collapse" data-parent="#sign_accordion" href="#collapseOne"> Create an account</a>
+                  <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne"> Create an account</a>
                 </h4>
               </div>
               <div id="collapseOne" class="panel-collapse collapse">
-                <div id="signup_bar" class="panel-body">
-		  <form role="form" id="signup_form" name="signup" action="/signup" method="post" data-autosubmit="1">
+                <div class="panel-body signupbar">
+		  <form role="form" name="signup" action="/signup" method="post" data-autosubmit="1">
 		    <!-- begin of honey spot -->
 		    <input type="text" id="signup_hs" name="hs_email" class="hide">
 		    <!-- end of honey spot -->
@@ -113,12 +113,12 @@
             <div class="panel panel-primary">
               <div class="panel-heading">
                 <h4 class="panel-title">
-                  <a data-toggle="collapse" data-parent="#sign_accordion" href="#collapseThree"> My account</a>
+                  <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree"> My account</a>
                 </h4>
               </div>
               <div id="collapseThree" class="panel-collapse collapse in">
-                <div id="signin_bar" class="panel-body">
-		  <form role="form" id="signin_form" name="signin" action="/signin" method="post" data-autosubmit="1">
+                <div class="panel-body signinbar">
+		  <form role="form" name="signin" action="/signin" method="post" data-autosubmit="1">
 		    <!-- begin of honey spot -->
 		    <input type="text" id="signin_hs" class="hide" name="hs_email">
 		    <!-- end of honey spot -->
@@ -144,12 +144,12 @@
             <div class="panel panel-grey">
               <div class="panel-heading">
                 <h4 class="panel-title">
-                  <a data-toggle="collapse" data-parent="#sign_accordion" href="#collapseTwo"> I forgot my password</a>
+                  <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo"> I forgot my password</a>
                 </h4>
               </div>
               <div id="collapseTwo" class="panel-collapse collapse">
-                <div id="passreset_bar" class="panel-body">
-		  <form role="form" id="passreset_form" name="passreset" action="/passreset" method="post" data-autosubmit="1">
+                <div class="panel-body passresetbar">
+		  <form role="form" name="passreset" action="/passreset" method="post" data-autosubmit="1">
 		    <div class="text-grey" style="margin-bottom:10px;">Send password reset email</div>
 		    <!-- begin of honey spot -->
 		    <input type="text" id="passreset_hs" class="hide" name="hs_email">
@@ -176,50 +176,52 @@
         
         
         <!-- Begin of Dict -->
-        <div id="dictionary" class="col-sm-8 col-md-9">
+        <div class="dict col-sm-8 col-md-9">
           <div class="panel panel-default">
             <div class="panel-heading clearfix">
               <div class="panel-title pull-left">
                 <span class="glyphicon glyphicon-book text-primary"></span> Dictionary
               </div>
-              <div id="dict_lang_panel" class="btn-group pull-right" style="margin: -6px 0 -6px 0">
-                <div class="btn-group select-group">
-                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    <span id="trn_from" class="select-legend" value="en">English</span>
-                    <span class="caret"></span>
-                  </button>
-                  <ul class="dropdown-menu" role="menu">
-                    <li><a href="#" value="en">English</a></li>
-                    <li class="divider"></li>
-                    <li><a href="#" value="ru">Russian</a></li>
-                  </ul>
-                </div>
-                <div class="btn-group">
-                  <button id="lang_swapper" type="button" class="btn btn-primary" role="button">&nbsp;&#8646;&nbsp;</button>
-                </div>
-                <div class="btn-group select-group">
-                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    <span id="trn_to" class="select-legend" value="ru">Russian</span>
-                    <span class="caret"></span>
-                  </button>
-                  <ul class="dropdown-menu pull-right" role="menu"><!-- 'pull-right' is IMPORTANT! -->
-                    <li><a href="#" value="en">English</a></li>
-                    <li class="divider"></li>
-                    <li><a href="#" value="ru">Russian</a></li>
-                  </ul>
-                </div>
-              </div>
             </div>
             <div class="panel-body">
-              <div id="dict_search_panel" class="container-fluid">
+              <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
                 <p>
-                  <form id="trn_form" role="search" action="/translate" method="post" data-autosubmit="1">
-                    <div class="input-group">
-		      <input type="hidden" id="trn_source" name="trn_source" value="">
-		      <input type="hidden" id="trn_target" name="trn_target" value="">
-                      <input type="text" id="trn_query" name="trn_query" class="form-control" placeholder="Word or phrase">
+                  <form role="search">
+		    <div id="lang_panel" class="btn-group">
+		      <div class="btn-group select-group">
+			<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+			  <span id="trn_from" class="select-legend">English</span>
+			  <span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu" role="menu">
+			  <li><a href="#">English</a></li>
+			    <li class="divider"></li>
+			    <li><a href="#">Russian</a></li>
+			</ul>
+		      </div>
+		      <div class="btn-group">
+			<button id="swapper" type="button" class="btn btn-primary" role="button">&nbsp;&#8646;&nbsp;</button>
+		      </div>
+		      <div class="btn-group select-group">
+			<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+			  <span id="trn_to" class="select-legend">Russian</span>
+			  <span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu pull-right" role="menu"><!-- 'pull-right' is IMPORTANT! -->
+			  <li><a href="#">English</a></li>
+			    <li class="divider"></li>
+			    <li><a href="#">Russian</a></li>
+			</ul>
+		      </div>
+		    </div>
+			
+			
+			
+                    <div class="input-group pull-right">
+                      <input type="text" class="form-control" placeholder="Word or phrase">
                       <span class="input-group-btn">
-                        <button type="button" id="btn-translate" class="btn btn-primary">Translate</button>
+                        <button class="btn btn-primary" type="button">Translate</button>
                       </span>
                     </div>
                   </form>
@@ -227,27 +229,23 @@
               </div>
 	      
 	      <!-- Begin of Tab panel -->
-	      <div id="dict_msg_panel" class="dict_msg"></div>
-	      <div id="dict_tab_panel" class="dict-tabs">
-		<ul id="dic_tabs" class="nav nav-tabs"></ul><!-- Nav tabs -->
-		<div id="dic_body" class="tab-content"></div><!-- Tab panes -->
-		---
-	      </div>
-	      <!--div class="hide">
+	      <div class="hide">
 		<p class="text-center" style="margin: 10px 0px 10px 0px;"><b>word or phrase</b></p>
-		
-		<ul id="dic_tabs_" class="nav nav-tabs">
+		  
+		<!-- Nav tabs -->
+		<ul class="nav nav-tabs" id="dictab">
 		  <li class="pull-right active"><a href="#dict1" data-toggle="tab">wordCard</a></li>
 		  <li class="pull-right"><a href="#dict2" data-toggle="tab">Lingvo</a></li>
 		  <li class="pull-right"><a href="#dict3" data-toggle="tab">Collins</a></li>
 		</ul>
-		
-		<div id="dic_content_" class="tab-content">
+		  
+		<!-- Tab panes -->
+		<div class="tab-content">
 		  <div class="tab-pane active" id="dict1"><div style='margin-top: 10px;'>wm</div></div>
 		  <div class="tab-pane" id="dict2"><div style='margin-top: 10px;'>lingvo</div></div>
 		  <div class="tab-pane" id="dict3"><div style='margin-top: 10px;'>collins</div></div>
 		</div>
-	      </div-->
+	      </div>
 	      <!-- End of Tab panel -->
 	      
             </div>

@@ -2,9 +2,7 @@ package WordMedium::Dictionary;
 
 use Mojo::Base 'Mojolicious::Controller';
 
-sub body {
-    
-}
+my $EXTRA_DICTIONARY_GROUP_NAME = 'extdict';
 
 sub translate {
     my $self = shift;
@@ -12,64 +10,89 @@ sub translate {
     my $word = $self->req->param('trn_query');
     my $source = $self->req->param('trn_source');
     my $target = $self->req->param('trn_target');
+    
     unless ($word && $source && $target) {
-        $self->render(json => {trn => ''});
+        $self->render(json => {msg => 'No word or phrase to translate.'});
         return;
     }
     
     $self->render_later;
+    
+    my ($trns, $extra);
+    my $ingroups = $self->stash('ugroup') && (exists $self->stash('ugroup')->{$EXTRA_DICTIONARY_GROUP_NAME}) ? 1 : 0;
+    
+    #$self->app->log->debug("ingroups => $ingroups\n");
     my $delay = Mojo::IOLoop::Delay->new;
     $delay->steps(
-        sub {
+        sub {# basic dictionary
             my $d = shift;
             
             my $end = $d->begin(0);
             $self->dict->query({
-                sql => q{SELECT body FROM card WHERE keyword = ? AND source = ? AND target = ? ORDER BY card_id},
+                sql => q{SELECT alias, body FROM card WHERE keyword = ? AND source = ? AND target = ? ORDER BY card_id},
                 val => [$word, $source, $target],
                 cb => sub {
                     my ($rv, $sth) = @_;
                     
-                    my $trns = {};
-                    while(my ($card_body) = $sth->fetchrow_array()) {
-                        push @{$trns->{wordCard}}, $card_body;
+                    while(my ($alias, $body) = $sth->fetchrow_array()) {
+                        push @{$trns->{$alias}}, $body;
                     }
-                    $end->($trns);
+                    $end->();
                 }
             });
+            return 1;
         },
-        sub { # extra dictionaries
-            my ($d, $trns) = @_;
+        sub {# extra dictionaries
+            my $d = shift;
             
             my $end = $d->begin(0);
-            
-            $self->core->do({
-                sql => q{UPDATE user SET pass = ? WHERE uid = ?},
-                val => [$crptpass, $uid],
-                cb => sub {
-                    my ($rv, $dbh) = @_;
-                    $end->($uid, $new_password);
-                }
-            });
-        },
-        sub { # extra dictionaries
-            my ($d, $trns) = @_;
-            
-            unless (keys %$trns) {
-                $self->render(json => {trn => '', msg => 'Ooops! No entry.', msgtype => 'error'});
-                return;
+            if ($ingroups) {
+                $self->dict->query({
+                    sql => q{SELECT alias, body FROM dictionary WHERE keyword = ? AND source = ? AND target = ? ORDER BY card_id},
+                    val => [$word, $source, $target],
+                    cb => sub {
+                        my ($rv, $sth) = @_;
+                        
+                        while(my ($alias, $body) = $sth->fetchrow_array()) {
+                            push @{$extra->{$alias}}, $body;
+                        }
+                        $end->();
+                    }
+                });
+            } else {
+                $end->();
             }
+            
+            return 1;
+        },
+        sub {# guess and rendering
+            my $d = shift;
+            
+            if ($trns || $extra) {
+                $self->render(json => {word => $word, trn => $trns, extra => $extra});
+            $self->app->log->debug("$trns->{WordMedium}[0]\n");
+            } else { # let's guess what does the query means
+# TO DO: fuzzy search across cards and dictionaries
+# needed startup initialization of non-redundant keyword lists for `cards` and `cards+dictionaries` sets
+                my $guess;
+                if ($ingroups) {
+                    # use non-redundant keyword list for cards+dictionaries 
+                } else {
+                    # use non-redundant keyword list only for cards
+                }
+                if ($guess) {
+                    $self->render(json => {guess => $guess});
+                } else {
+                    $self->render(json => {msg => 'No translation.'});
+                }
+            }
+            
+            return;
         },
     );
+    
     $delay->wait unless Mojo::IOLoop->is_running;
     return 1;
-    
-    if ($self->is_authenticated) {
-        #
-        my $uid = $self->uid;
-    }
-    
-    
 }
 
 
