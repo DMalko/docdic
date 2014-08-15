@@ -1,9 +1,9 @@
 
 // dictionary card rendering function
-function makeCardTabs(cardStock) {
+function makeCardTabs(cardStock, cardStockExtra) {
     var dic = {tabs: '', body: ''};
     
-    if (!cardStock) { return dic }
+    if (! (cardStock || cardStockExtra)) { return dic }
     
     var tab_id = 0;
     for (var dictionary in cardStock) {
@@ -124,22 +124,12 @@ function makeCardTabs(cardStock) {
         }
         dic.body += '</div>';
     }
-    
-    return dic;
-}
-
-// dictionary extracard rendering function
-function makeExtraTab(cardStock) {
-    var dic = {tabs: '', body: ''};
-    
-    if (!cardStock) { return dic }
-    
-    var tab_id = 0;
-    for (var dictionary in cardStock) {
-        if (!cardStock.hasOwnProperty(dictionary)) continue;
+    // extra dictionaries
+    for (var dictionary in cardStockExtra) {
+        if (!cardStockExtra.hasOwnProperty(dictionary)) continue;
         // make card tab
         dic.tabs += '<li class="pull-right';
-        dic.body += '<div id="dic_extratab' + tab_id + '" class="tab-pane';
+        dic.body += '<div id="dic_tab' + tab_id + '" class="tab-pane';
         if (tab_id == 0) {
             dic.tabs += ' active">';
             dic.body += ' active">';
@@ -147,15 +137,13 @@ function makeExtraTab(cardStock) {
             dic.tabs += '">';
             dic.body += '">';
         }
-        dic.tabs += '<a href="#dic_extratab' + tab_id + '" data-toggle="tab">' + dictionary + '</a></li>';
+        dic.tabs += '<a href="#dic_tab' + tab_id + '" data-toggle="tab">' + dictionary + '</a></li>';
         tab_id++;
         // make card body
-        for (var cid = 0, c_len = cardStock[dictionary].length; cid < c_len; cid++) {
-            if (cardStock[dictionary][cid]) {
-                var cardbody = $.parseJSON(cardStock[dictionary][cid]);
-                
+        for (var cEid = 0, c_len = cardStockExtra[dictionary].length; cEid < c_len; cEid++) {
+            if (cardStockExtra[dictionary][cEid]) {
                 //dic.body += '<p class="dic-kword">' + keyword + '</p>';
-                dic.body += '<dev class="dic-extracard">' + cardbody + '</dev>';
+                dic.body += '<div class="dic-extracard">' + cardStockExtra[dictionary][cEid] + '</div>';
             }
         }
         dic.body += '</div>';
@@ -207,9 +195,10 @@ $('#trn_form').bind('formdata', function(event, data) {
         $('#trn_query').val('');
         $('#dict_msg_panel').html(data.word);
         
-        var dicdata = makeCardTabs(data.trn);
-        $('#dic_tabs').html(dicdata.tabs);
-        $('#dic_body').html(dicdata.body);
+        var dicData = makeCardTabs(data.trn, data.extra);
+        
+        $('#dic_tabs').html(dicData.tabs);
+        $('#dic_body').html(dicData.body);
         $('#dict_tab_panel').removeClass("hide");
     }
 });

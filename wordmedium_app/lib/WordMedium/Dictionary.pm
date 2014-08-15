@@ -21,6 +21,8 @@ sub translate {
     my ($trns, $extra);
     my $ingroups = $self->stash('ugroup') && (exists $self->stash('ugroup')->{$EXTRA_DICTIONARY_GROUP_NAME}) ? 1 : 0;
     
+$ingroups = 1;
+    
     #$self->app->log->debug("ingroups => $ingroups\n");
     my $delay = Mojo::IOLoop::Delay->new;
     $delay->steps(
@@ -48,8 +50,8 @@ sub translate {
             my $end = $d->begin(0);
             if ($ingroups) {
                 $self->dict->query({
-                    sql => q{SELECT alias, body FROM dictionary WHERE keyword = ? AND source = ? AND target = ? ORDER BY card_id},
-                    val => [$word, $source, $target],
+                    sql => q{SELECT alias, body FROM dict WHERE keyword = ? AND source = ? AND target IN (?, ?) ORDER BY card_id},
+                    val => [$word, $source, $target, $source],
                     cb => sub {
                         my ($rv, $sth) = @_;
                         
