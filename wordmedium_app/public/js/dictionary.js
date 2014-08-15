@@ -1,26 +1,24 @@
 
 // dictionary card rendering function
 function makeCardTabs(cardStock) {
+    var dic = {tabs: '', body: ''};
     
-    if (!cardStock) { return 0 }
-    
-    var dictabs = $('#dic_tabs').html();
-    var dicbody = $('#dic_body').html();
+    if (!cardStock) { return dic }
     
     var tab_id = 0;
     for (var dictionary in cardStock) {
         if (!cardStock.hasOwnProperty(dictionary)) continue;
         // make card tab
-        dictabs += '<li class="pull-right';
-        dicbody += '<div id="tab' + tab_id + '" class="tab-pane';
+        dic.tabs += '<li class="pull-right';
+        dic.body += '<div id="dic_tab' + tab_id + '" class="tab-pane';
         if (tab_id == 0) {
-            dictabs += ' active">';
-            dicbody += ' active">';
+            dic.tabs += ' active">';
+            dic.body += ' active">';
         } else {
-            dictabs += '">';
-            dicbody += '">';
+            dic.tabs += '">';
+            dic.body += '">';
         }
-        dictabs += '<a href="#tab' + tab_id + '" data-toggle="tab">' + dictionary + '</a></li>';
+        dic.tabs += '<a href="#dic_tab' + tab_id + '" data-toggle="tab">' + dictionary + '</a></li>';
         tab_id++;
         // make card body
         for (var cid = 0, c_len = cardStock[dictionary].length; cid < c_len; cid++) {
@@ -33,38 +31,38 @@ function makeCardTabs(cardStock) {
                 var comment     = cardfield[3];
                 var definitions = cardfield[4];
                 
-                //dicbody += '<p class="dict-kword">' + keyword + '</p>';
+                //dic.body += '<p class="dic-kword">' + keyword + '</p>';
                 if (wordforms.length) {
-                    dicbody += '<div class="dict-wform"><span class="dict-wform-legend">forms: </span>';
+                    dic.body += '<div class="dic-wform"><span class="dic-wform-legend">forms: </span>';
                     for (var formid = 0, form_len = wordforms.length; formid < form_len; formid++) {
-                        dicbody += wordforms[formid][0];
+                        dic.body += wordforms[formid][0];
                         if (wordforms[formid][1]) {
-                            dicbody += '<span class="dict-wform-type"> (' + wordforms[formid][0] + ')</span>';
+                            dic.body += '<span class="dic-wform-type"> (' + wordforms[formid][0] + ')</span>';
                         }
                         if (formid + 1 < form_len) {
-                            dicbody += ', '
+                            dic.body += ', '
                         }
                     }
-                    dicbody += '</div>';
+                    dic.body += '</div>';
                 }
                 if (alsouse.length) {
-                    dicbody += '<div class="dict-alsou"><span class="dict-alsou-legend">also uses: </span>';
+                    dic.body += '<div class="dic-alsou"><span class="dic-alsou-legend">also uses: </span>';
                     for (var useid = 0, use_len = alsouse.length; useid < use_len; useid++) {
-                        dicbody += alsouse[useid][0];
+                        dic.body += alsouse[useid][0];
                         if (alsouse[1]) {
-                            dicbody += '<span class="dict-alsou-type"> (' + alsouse[useid][0] + ')</span>';
+                            dic.body += '<span class="dic-alsou-type"> (' + alsouse[useid][0] + ')</span>';
                         }
                         if (useid + 1 < use_len) {
-                            dicbody += ', '
+                            dic.body += ', '
                         }
                     }
-                    dicbody += '</div>';
+                    dic.body += '</div>';
                 }
                 if (comment.length) {
-                    dicbody += '<div class="dict-comment">' + comment + '</div>';
+                    dic.body += '<div class="dic-comment">' + comment + '</div>';
                 }
                 if (definitions.length) {
-                    dicbody += '<div class="dict-def">';
+                    dic.body += '<div class="dic-def">';
                     for (var defid = 0, def_len = definitions.length; defid < def_len; defid++) {
                         var pronuns   = definitions[defid][0];
                         var spchparts = definitions[defid][1];
@@ -75,13 +73,13 @@ function makeCardTabs(cardStock) {
                                 var sound         = pronuns[p][1];
                                 var note          = pronuns[p][2];
                                 
-                                dicbody += '<div class="dict-pronun">';
-                                dicbody += '<span class="dict-transcr">' + '[' + transcription + ']' + ' </span>';
+                                dic.body += '<div class="dic-pronun">';
+                                dic.body += '<span class="dic-transcr">' + '[' + transcription + ']' + ' </span>';
                                 if (sound) {
-                                    dicbody += '<a class="dict-sound" href="' + sound + '"><span class="sound-image"></span></a>';
+                                    dic.body += '<a class="dic-sound" href="' + sound + '"><span class="sound-image"></span></a>';
                                 }
-                                dicbody += '<span class="dict-note"> ' + note + '</span>';
-                                dicbody += '</div>';
+                                dic.body += '<span class="dic-note"> ' + note + '</span>';
+                                dic.body += '</div>';
                             }
                         }
                         if (spchparts.length) {
@@ -89,51 +87,81 @@ function makeCardTabs(cardStock) {
                                 var speechpart = spchparts[sp][0];
                                 var records    = spchparts[sp][1];
                                 
-                                dicbody += '<div class="dict-speechpart speechpart-' + speechpart + '">';
-                                dicbody += '<div class="dict-speechpart-legend">' + speechpart + '</div>';
-                                dicbody += '<table class="dict-transl-table">';
-                                dicbody += '<tbody>';
+                                dic.body += '<div class="dic-speechpart speechpart-' + speechpart + '">';
+                                dic.body += '<div class="dic-speechpart-legend">' + speechpart + '</div>';
+                                dic.body += '<table class="dic-transl-table">';
+                                dic.body += '<tbody>';
                                 if (records.length) {
                                     for (var t = 0, t_len = records.length; t < t_len; t++) {
                                         var rate        = records[t][0];
                                         var translation = records[t][1];
                                         var synonyms    = records[t][2];
                                         
-                                        dicbody += '<tr class="dict-record">';
-                                        dicbody += '<td class="dict-translation" rate="' + rate + '">' + translation + '</td>';
-                                        dicbody += '<td class="dict-synonyms">';
+                                        dic.body += '<tr class="dic-record">';
+                                        dic.body += '<td class="dic-translation" rate="' + rate + '">' + translation + '</td>';
+                                        dic.body += '<td class="dic-synonyms">';
                                         if (synonyms.length) {
                                             for (var s = 0, s_len = synonyms.length; s < s_len; s++) {
-                                                dicbody += '<span class="dict-synonym">' + synonyms[s] + '</span>';
+                                                dic.body += '<span class="dic-synonym">' + synonyms[s] + '</span>';
                                                 if (s + 1 < s_len) {
-                                                    dicbody += ', ';
+                                                    dic.body += ', ';
                                                 }
                                             }
                                         }
-                                        dicbody += '</td>';
-                                        dicbody += '</tr>';
+                                        dic.body += '</td>';
+                                        dic.body += '</tr>';
                                     }
                                 }
-                                dicbody += '</tbody>';
-                                dicbody += '</table>';
-                                dicbody += '</div>';
+                                dic.body += '</tbody>';
+                                dic.body += '</table>';
+                                dic.body += '</div>';
                             }
                         }
                     }
-                    dicbody += '</div>'; 
+                    dic.body += '</div>'; 
                 }
             }
         }
-        dicbody += '</div>';
+        dic.body += '</div>';
     }
-    $('#dic_tabs').html(dictabs);
-    $('#dic_body').html(dicbody);
     
-    return 1;
+    return dic;
 }
 
-function extraTab() {
+// dictionary extracard rendering function
+function makeExtraTab(cardStock) {
+    var dic = {tabs: '', body: ''};
     
+    if (!cardStock) { return dic }
+    
+    var tab_id = 0;
+    for (var dictionary in cardStock) {
+        if (!cardStock.hasOwnProperty(dictionary)) continue;
+        // make card tab
+        dic.tabs += '<li class="pull-right';
+        dic.body += '<div id="dic_extratab' + tab_id + '" class="tab-pane';
+        if (tab_id == 0) {
+            dic.tabs += ' active">';
+            dic.body += ' active">';
+        } else {
+            dic.tabs += '">';
+            dic.body += '">';
+        }
+        dic.tabs += '<a href="#dic_extratab' + tab_id + '" data-toggle="tab">' + dictionary + '</a></li>';
+        tab_id++;
+        // make card body
+        for (var cid = 0, c_len = cardStock[dictionary].length; cid < c_len; cid++) {
+            if (cardStock[dictionary][cid]) {
+                var cardbody = $.parseJSON(cardStock[dictionary][cid]);
+                
+                //dic.body += '<p class="dic-kword">' + keyword + '</p>';
+                dic.body += '<dev class="dic-extracard">' + cardbody + '</dev>';
+            }
+        }
+        dic.body += '</div>';
+    }
+    
+    return dic;
 }
 
 // dictionary tabs
@@ -173,10 +201,15 @@ $('#trn_form').bind('formdata', function(event, data) {
     $('#dic_body').html('');
     
     if (data.msg) {
+        $('#dict_tab_panel').addClass("hide");
         $('#dict_msg_panel').html(data.msg);
     } else {
         $('#trn_query').val('');
         $('#dict_msg_panel').html(data.word);
-        makeCardTabs(data.trn);
+        
+        var dicdata = makeCardTabs(data.trn);
+        $('#dic_tabs').html(dicdata.tabs);
+        $('#dic_body').html(dicdata.body);
+        $('#dict_tab_panel').removeClass("hide");
     }
 });
