@@ -140,10 +140,10 @@ function makeCardTabs(cardStock, cardStockExtra) {
         dic.tabs += '<a href="#dic_tab' + tab_id + '" data-toggle="tab">' + dictionary + '</a></li>';
         tab_id++;
         // make card body
-        for (var cEid = 0, c_len = cardStockExtra[dictionary].length; cEid < c_len; cEid++) {
-            if (cardStockExtra[dictionary][cEid]) {
+        for (var ceid = 0, c_len = cardStockExtra[dictionary].length; ceid < c_len; ceid++) {
+            if (cardStockExtra[dictionary][ceid]) {
                 //dic.body += '<p class="dic-kword">' + keyword + '</p>';
-                dic.body += '<div class="dic-extracard">' + cardStockExtra[dictionary][cEid] + '</div>';
+                dic.body += '<div class="dic-extracard">' + cardStockExtra[dictionary][ceid] + '</div>';
             }
         }
         dic.body += '</div>';
@@ -182,6 +182,14 @@ $('#btn-translate').click(function(){
     $('#trn_form').submit();
 });
 
+// translate by "press Enter"
+$("#trn_query").keypress(function(e) {
+    if (e.which == 13) {
+        e.preventDefault();
+        $('#btn-translate').focus().click();
+    }
+});
+
 // dictionary tabs
 $('#trn_form').bind('formdata', function(event, data) {
     $('#dict_msg_panel').html('');
@@ -192,7 +200,7 @@ $('#trn_form').bind('formdata', function(event, data) {
         $('#dict_tab_panel').addClass("hide");
         $('#dict_msg_panel').html(data.msg);
     } else {
-        $('#trn_query').val('');
+        $('#trn_query').val(''); // clean input field
         $('#dict_msg_panel').html(data.word);
         
         var dicData = makeCardTabs(data.trn, data.extra);
