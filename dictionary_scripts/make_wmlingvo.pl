@@ -65,6 +65,7 @@ while(my ($kw, $trn, $dict) = $select_kw->fetchrow_array()) {
     $trn =~ s/<opt>/<span class="lng_opt">/sg;
     $trn =~ s/<\/(?:dtrn>|co?|abr|k(?:ref)?|ex|tr|opt)>/<\/span>/sg;
     $trn =~ s/<nu \/>//sg;
+    $trn =~ s/\n/<br>/sg;
     
     $tmp->print(join("\r", '\N', $kw, $trn, $s, $t, $dict, 0, 0), "\r\r");
 }

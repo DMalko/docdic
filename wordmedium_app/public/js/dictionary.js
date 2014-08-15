@@ -22,8 +22,9 @@ function makeCardTabs(cardStock, cardStockExtra) {
         tab_id++;
         // make card body
         for (var cid = 0, c_len = cardStock[dictionary].length; cid < c_len; cid++) {
-            if (cardStock[dictionary][cid]) {
-                var cardfield = $.parseJSON(cardStock[dictionary][cid]);
+            if (cardStock[dictionary][cid][0]) {
+                var cardfield = $.parseJSON(cardStock[dictionary][cid][0]);
+                var card_id = cardStock[dictionary][cid][1];
                 
                 var keyword     = cardfield[0];
                 var wordforms   = cardfield[1];
@@ -32,6 +33,7 @@ function makeCardTabs(cardStock, cardStockExtra) {
                 var definitions = cardfield[4];
                 
                 //dic.body += '<p class="dic-kword">' + keyword + '</p>';
+                dic.body += '<div class="dic-card" cardid="' + card_id + '">';
                 if (wordforms.length) {
                     dic.body += '<div class="dic-wform"><span class="dic-wform-legend">forms: </span>';
                     for (var formid = 0, form_len = wordforms.length; formid < form_len; formid++) {
@@ -120,6 +122,7 @@ function makeCardTabs(cardStock, cardStockExtra) {
                     }
                     dic.body += '</div>'; 
                 }
+                dic.body += '</div>';
             }
         }
         dic.body += '</div>';
@@ -141,9 +144,11 @@ function makeCardTabs(cardStock, cardStockExtra) {
         tab_id++;
         // make card body
         for (var ceid = 0, c_len = cardStockExtra[dictionary].length; ceid < c_len; ceid++) {
-            if (cardStockExtra[dictionary][ceid]) {
+            if (cardStockExtra[dictionary][ceid][0]) {
+                var cardfield = cardStockExtra[dictionary][ceid][0];
+                var card_id = cardStockExtra[dictionary][ceid][1];
                 //dic.body += '<p class="dic-kword">' + keyword + '</p>';
-                dic.body += '<div class="dic-extracard">' + cardStockExtra[dictionary][ceid] + '</div>';
+                dic.body += '<div class="dic-extracard" cardid="' + card_id + '">' + cardfield + '</div>';
             }
         }
         dic.body += '</div>';

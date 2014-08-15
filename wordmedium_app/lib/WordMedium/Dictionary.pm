@@ -31,13 +31,13 @@ $ingroups = 1;
             
             my $end = $d->begin(0);
             $self->dict->query({
-                sql => q{SELECT alias, body FROM card WHERE keyword = ? AND source = ? AND target = ? ORDER BY card_id},
+                sql => q{SELECT alias, body, card_id FROM card WHERE keyword = ? AND source = ? AND target = ? ORDER BY card_id},
                 val => [$word, $source, $target],
                 cb => sub {
                     my ($rv, $sth) = @_;
                     
-                    while(my ($alias, $body) = $sth->fetchrow_array()) {
-                        push @{$trns->{$alias}}, $body;
+                    while(my ($alias, $body, $card_id) = $sth->fetchrow_array()) {
+                        push @{$trns->{$alias}}, [$body, $card_id];
                     }
                     $end->();
                 }
@@ -50,13 +50,13 @@ $ingroups = 1;
             my $end = $d->begin(0);
             if ($ingroups) {
                 $self->dict->query({
-                    sql => q{SELECT alias, body FROM dict WHERE keyword = ? AND source = ? AND target IN (?, ?) ORDER BY card_id},
+                    sql => q{SELECT alias, body, card_id FROM dict WHERE keyword = ? AND source = ? AND target IN (?, ?) ORDER BY card_id},
                     val => [$word, $source, $target, $source],
                     cb => sub {
                         my ($rv, $sth) = @_;
                         
-                        while(my ($alias, $body) = $sth->fetchrow_array()) {
-                            push @{$extra->{$alias}}, $body;
+                        while(my ($alias, $body, $card_id) = $sth->fetchrow_array()) {
+                            push @{$extra->{$alias}}, [$body, $card_id];
                         }
                         $end->();
                     }
@@ -72,7 +72,6 @@ $ingroups = 1;
             
             if ($trns || $extra) {
                 $self->render(json => {word => $word, trn => $trns, extra => $extra});
-            $self->app->log->debug("$trns->{WordMedium}[0]\n");
             } else { # let's guess what does the query means
 # TO DO: fuzzy search across cards and dictionaries
 # needed startup initialization of non-redundant keyword lists for `cards` and `cards+dictionaries` sets
