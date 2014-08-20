@@ -13,12 +13,12 @@ use DBI;
 use XML::Simple;
 
 ###################################
-my $db_name = 'Dictionary';
+my $db_name = 'wm_dict';
 my $host = 'localhost';
 my $login = 'root';
 my $password = '';
 
-my $outfile = 'lingvo.tags';
+my $outfile = '/data/webprojects/docdic_data/lingvo.tags';
 ###################################
 
 my $dbh = DBI->connect("DBI:mysql:$db_name:$host;mysql_local_infile=1", $login, $password, {RaiseError => 1, PrintError => 0, mysql_enable_utf8 => 1}) || die "$DBI::err($DBI::errstr)\n";

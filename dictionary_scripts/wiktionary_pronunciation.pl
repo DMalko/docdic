@@ -1,12 +1,10 @@
 #! /usr/bin/perl
 
-### !!! before `Wiktionary::Parser` install `Locale::Codes::Language` !!! ###
-
-
 use warnings;
 use strict;
 
 use Wiktionary::Parser;
+### !!! before `Wiktionary::Parser` install `Locale::Codes::Language` !!! ###
 
 ############################################################
 my $wordfile = '../words.list';

@@ -29,11 +29,11 @@ my $dbh = DBI->connect("DBI:mysql:$db_name:$host;mysql_local_infile=1", $login, 
 $dbh->do('DROP TABLE IF EXISTS `source_lingvo`') if $clean;
 $dbh->do('CREATE TABLE IF NOT EXISTS `source_lingvo` (
         `id` int(11) NOT NULL AUTO_INCREMENT,
-        `dictionary` char(128) DEFAULT NULL,
+        `dictionary` char(64) DEFAULT NULL,
         `source` char(3) DEFAULT NULL,
         `target` char(3) DEFAULT NULL,
         `keyword` char(128) DEFAULT NULL,
-        `definition` longtext,
+        `definition` text,
         PRIMARY KEY (`id`),
         KEY `keyword` (`keyword`)
     )ENGINE=MyISAM DEFAULT CHARSET=utf8'
@@ -50,7 +50,9 @@ for my $key (keys $data->{article}) {
     $data->{article}{$key}{definition} =~ s/\s+$//s;
     $data->{article}{$key}{definition} =~ s/\n +/\n/sg;
     
-    print OUT (join("\r", '\N', $dictionary_name, $source, $target, $key, $data->{article}{$key}{definition}), "\r\r");
+    my $html = makeHTML($data->{article}{$key}{definition});
+    
+    print OUT (join("\r", '\N', $dictionary_name, $source, $target, $key, $html), "\r\r");
 }
 close OUT;
 $load->execute('tmp.file');
@@ -58,3 +60,30 @@ unlink "tmp.file";
 
 print "ok\n";
 print "finished!\n";
+
+sub makeHTML {
+    my $data = shift;
+    
+    my %tags = (
+        abr  => 'span class="lng_abbrev"',
+        dtrn => 'span class="lng_trnansl"',
+        co   => 'span class="lng_co"',
+        k    => 'span class="lng_kword"',
+        ex   => 'span class="lng_examp"',
+        kref => 'span class="lng_refer"',
+        tr   => 'span class="lng_transc"',
+        c    => 'span class="lng_colored"',
+        opt  => 'span class="lng_opt"',
+    );
+    
+    $data =~ s/<nu \/>//sg;
+    $data =~ s/<iref>.*?<\/iref>//sg;
+    $data =~ s/<tr>/<tr>\[/sg;
+    $data =~ s/<\/tr>/<\/tr>\]/sg;
+    
+    $data =~ s/<\/(?:abr|dtrn|co|k|ex|kref|tr|c|opt|)>//sg;
+    $data =~ s/<(abr|dtrn|co|k|ex|kref|tr|c|opt|)>/<$tags{$1}>/sg;
+    
+    $data =~ s/^[0-9a-z]+\).*/$&/i;
+    $data =~ s/\n/<br>/sg;
+}
