@@ -10,32 +10,23 @@ use LWP::UserAgent;
 use URI::Encode qw(uri_encode uri_decode);
 use Encode qw (encode decode);
 use Time::HiRes qw (sleep);
+use Mojo::DOM;
 
 
 ###################################
-my $infile = "/data/webprojects/docdic_data/collins.keywords.txt";
+my $infile = "/data/webprojects/DocDic.Project/docdic_data/keywords/collins.keywords.txt";
 
-my $dictionary = 'Collins COBUILD English for Learners';
-#my $dictionary = 'LingvoUniversal (En-Ru)';
+my $dictionary = 'Collins COBUILD Advanced Learner&apos;s Dictionary 2006';
 
-my $version = 'http://www.collinsdictionary.com/dictionary/english-cobuild-learners (grab date: Aug2014) with keywords of ';
-#my $version = 'www.lingvo-online.ru (grab date: Aug2014) with keywords of LingvoUniversal (En-Ru) 2008.11.14';
-
-my $alias  = 'Lingvo';
-
-my $source = 'ru';
-#my $source = 'en';
-
+my $version = q#http://www.collinsdictionary.com/dictionary/english-cobuild-learners (grab date: Aug2014) with keywords of Collins COBUILD Advanced Learner's Dictionary 2006#;
+my $alias  = 'Collins';
+my $source = 'en';
 my $target = 'en';
-#my $target = 'ru';
 
-my $dictionary_name = 'Universal+(Ru-En)';
-#my $dictionary_name = 'LingvoUniversal+(En-Ru)';
 
-my $url = 'http://www.lingvo-online.ru/ru/Search/Translate/FullLingvoArticle?dictionarySystemName=';
-#&title=word_to_translate&random_hyyd20np=1'; #random_hyyastxy
+my $url = 'http://www.collinsdictionary.com/dictionary/english-cobuild-learners/';
 
-my $sleep_time = 0.5;
+my $sleep_time = 1;
 ###################################
 
 ###################################
@@ -48,8 +39,8 @@ my $clean = 0;
 
 my $dbh = DBI->connect("DBI:mysql:$db_name:$host;mysql_local_infile=1", $login, $password, {RaiseError => 1, PrintError => 0, mysql_enable_utf8 => 1}) || die "$DBI::err($DBI::errstr)\n";
 
-$dbh->do('DROP TABLE IF EXISTS `dic_lingvo_www`') if $clean;
-$dbh->do('CREATE TABLE IF NOT EXISTS `dic_lingvo_www` (
+$dbh->do('DROP TABLE IF EXISTS `dic_collins_www`') if $clean;
+$dbh->do('CREATE TABLE IF NOT EXISTS `dic_collins_www` (
             `article_id` int(11) NOT NULL AUTO_INCREMENT,
             `keyword` varchar(128) DEFAULT NULL,
             `article` longtext,
@@ -63,18 +54,13 @@ $dbh->do('CREATE TABLE IF NOT EXISTS `dic_lingvo_www` (
           ) ENGINE=MyISAM DEFAULT CHARSET=utf8'
 );
 
-my $select_max = $dbh->prepare(q/SELECT MAX(article_id) FROM `dic_lingvo_www`/);
-my $select_basic = $dbh->prepare(q/SELECT COUNT(*) FROM `dic_lingvo_www` WHERE BINARY keyword = ?/);
-my $load_basic = $dbh->prepare(q/INSERT INTO `dic_lingvo_www` (keyword, article, source, target, dictionary, version, alias) VALUES (?, ?, ?, ?, ?, ?, ?)/);
+my $select_max = $dbh->prepare(q/SELECT MAX(article_id) FROM `dic_collins_www`/);
+my $select_basic = $dbh->prepare(q/SELECT COUNT(*) FROM `dic_collins_www` WHERE BINARY keyword = ?/);
+my $load_basic = $dbh->prepare(q/INSERT INTO `dic_collins_www` (keyword, article, source, target, dictionary, version, alias) VALUES (?, ?, ?, ?, ?, ?, ?)/);
 
 $select_max->execute();
 my ($n) = $select_max->fetchrow_array();
 $n++;
-
-$url .= $dictionary_name.'&title=';
-
-my @chars = ("0".."9", "a".."z");
-my $rand_str = '&random_hyy'.join('', (map {$chars[rand @chars]} (1..5))).'=1';
 
 my $ua = LWP::UserAgent->new();
 $ua->agent("Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)");
@@ -89,7 +75,7 @@ while (my $word = <IN>) {
         print $word, "\n";
         next;
     }
-    my $rqst = $url.uri_encode(decode("utf8", $word)).$rand_str;
+    my $rqst = $url.uri_encode($word);
     my $request = HTTP::Request->new(GET => $rqst);
     my $res = $ua->request($request);
     while ($res->{_rc} != 200) {
@@ -97,12 +83,14 @@ while (my $word = <IN>) {
         sleep 3;
         $res = $ua->request($request);
     }
-    my $content = $res->{_content};
+    my $content = decode("utf8", $res->{_content});
+    html_washer(\$content);
+    $content =~ s/\s+/ /sg;
     
-    if ($content !~ m/^\{"article"/) {
-        die "ERROR:\$word\n";
+    unless ($content) {
+        print "no entry: $word\n";
+        next;
     }
-    next if $content =~ m/^\{"article".null\}/;
     $load_basic->execute($word, $content, $source, $target, $dictionary, $version, $alias);
     print $n++, '> ', $word, "\n";
     sleep $sleep_time;
@@ -110,4 +98,27 @@ while (my $word = <IN>) {
 close IN;
 
 print "finished!\n";
+
+###################################################################################
+sub html_washer {
+    my $html = shift;
+    
+    my $dom = Mojo::DOM->new($$html);
+    $$html = undef;
+    for my $data ($dom->find('div[class="definition_content col main_bar"]')->each) {
+        for my $garbage ($data->children('div[class="term-subsec"]')->each) {
+            $garbage->remove;
+        }
+        for my $garbage ($data->children('script')->each) {
+            $garbage->remove;
+        }
+        for my $garbage ($data->children('div[class="the_word"]')->each) {
+            $garbage->remove;
+        }
+        $$html = $data->to_string;
+        last;
+    }
+    
+    return 1;
+}
 
