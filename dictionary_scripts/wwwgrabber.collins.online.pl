@@ -22,6 +22,8 @@ my $alias  = 'Collins';
 my $source = 'en';
 my $target = 'en';
 
+my $sound_dir = '.';
+
 my $domain = 'http://www.collinsdictionary.com';
 my $url_alphabet = '/dictionary/english-cobuild-learners';
 
@@ -61,11 +63,13 @@ $select_max->execute();
 my ($n) = $select_max->fetchrow_array();
 $n++;
 
+$sound_dir =~ s/\/$//;
+
 my $ua = LWP::UserAgent->new();
 $ua->agent("Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)");
 
 my $content = get_url($domain.$url_alphabet);
-$content = decode("utf8", $content);
+#$content = decode("utf8", $content);
 
 my $dom = Mojo::DOM->new($content);
 for my $word_set_link ($dom->find('div[class="alphabet_wrapper alphabets"] a')->each) {
@@ -73,32 +77,39 @@ for my $word_set_link ($dom->find('div[class="alphabet_wrapper alphabets"] a')->
     print $link , "\n";
 
     my $content = get_url($link);
-    $content = decode("utf8", $content);
+    #$content = decode("utf8", $content);
     my $dom_linkset = Mojo::DOM->new($content);
     for my $word_link ($dom_linkset->find('div[class="main_bar col lists"] div[class="col"] a')->each) {
         my $secont_level_link = $domain.$word_link->attr('href');
         my $word = $word_link->content;
         
         my $content = get_url($secont_level_link);
-        $content = decode("utf8", $content);
+        #$content = decode("utf8", $content);
         
         my $dom_linkset2 = Mojo::DOM->new($content);
         if ($dom_linkset2->find('div[class="definition_content col main_bar"]')) {
+            next if is_stored($word);
+            
+            for my $url_link (find_sound_links(\$content)) {
+                make_path($sound_dir, $url_link);
+                next if -e $sound_dir.$url_link;
+                get_url($domain.$url_link, ':content_file' => $sound_dir.$url_link);
+            }
             write_to_db($word, \$content);
         } else {
             for my $word_link2 ($dom_linkset2->find('div[class="main_bar col lists"] div[class="col"] a')->each) {
                 my $article_link = $domain.$word_link2->attr('href');
                 my $word = $word_link2->content;
                 
-                $select_basic->execute($word);
-                my ($in_table) = $select_basic->fetchrow_array();
-                if($in_table) {
-                    print $word, "\n";
-                    next;
-                }
+                next if is_stored($word);
                 
                 my $content = get_url($article_link);
-                $content = decode("utf8", $content);
+                #$content = decode("utf8", $content);
+                for my $url_link (find_sound_links(\$content)) {
+                    make_path($sound_dir, $url_link);
+                    next if -e $sound_dir.$url_link;
+                    get_url($domain.$url_link, ':content_file' => $sound_dir.$url_link);
+                }
                 write_to_db($word, \$content);
             }
         }
@@ -108,6 +119,46 @@ for my $word_set_link ($dom->find('div[class="alphabet_wrapper alphabets"] a')->
 print "finished!\n";
 
 ###################################################################################
+sub is_stored {
+    my $word = shift;
+    
+    $select_basic->execute($word);
+    my ($in_table) = $select_basic->fetchrow_array();
+    if($in_table) {
+        print 'IN STOCK: ', $word, "\n";
+        return 1;
+    }
+    
+    return;
+}
+
+sub make_path {
+    my $root = shift;
+    my $path = shift;
+    
+    while ($path =~ m/([^\/]+)\//g) {
+        $root .= '/' if $root !~ m/\/$/;
+        $root .= $1;
+        mkdir $root unless -e $root;
+    }
+    
+    return 1;
+}
+
+sub find_sound_links {
+    my $html = shift;
+    
+    my @links = ();
+    my $dom = Mojo::DOM->new($$html);
+    for my $sound ($dom->find('img[class="sound"]')->each) {
+        my $link = $sound->attr('onclick');
+        if ($link =~ m/'(\/sounds[^']+mp3)'/i) {
+            push @links, $1;
+        }
+    }
+    return @links;
+}
+
 sub html_washer {
     my $html = shift;
     
@@ -150,17 +201,21 @@ sub write_to_db {
 }
 
 sub get_url {
+    my $request = shift;
+    my @options = @_;
+    
     sleep $sleep_time;
     
-    my $request = HTTP::Request->new(GET => shift);
-    my $res = $ua->request($request);
-    my $sl = 0;
-    while ($res->{_rc} != 200) {
-        print "sleep!\n";
+    #my $request = HTTP::Request->new(GET => shift);
+    #my $res = $ua->request($request);
+    my $res = $ua->get($request, @options);
+    my $n = 0;
+    while (!$res->is_success) {
+        print STDERR $res->status_line, "\n";
         sleep 3;
-        $res = $ua->request($request);
-        die "ERROR: sleep loop!\n" if ++$sl > 3;
+        $res = $ua->get($request);
+        die "ERROR: request fault ($request)\n" if ++$n > 3;
     }
     
-    return $res->{_content};
+    return $res->decoded_content;
 }
