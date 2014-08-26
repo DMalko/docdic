@@ -15,25 +15,25 @@ use JSON;
 use MIME::Base64;
 
 ###################################
-#my $infile = "/data/webprojects/DocDic.Project/docdic_data/keywords/lingvo_ru-en.keywords.txt";
-my $infile = "/data/webprojects/DocDic.Project/docdic_data/keywords/lingvo_en-ru.keywords.txt";
+my $infile = "/data/webprojects/DocDic.Project/docdic_data/keywords/lingvo_ru-en.keywords.txt";
+#my $infile = "/data/webprojects/DocDic.Project/docdic_data/keywords/lingvo_en-ru.keywords.txt";
 
-#my $dictionary = 'Universal (Ru-En)';
-my $dictionary = 'LingvoUniversal (En-Ru)';
+my $dictionary = 'Universal (Ru-En)';
+#my $dictionary = 'LingvoUniversal (En-Ru)';
 
-#my $version = 'www.lingvo-online.ru (grab date: Aug2014) keyword of Universal (Ru-En) 2004';
-my $version = 'www.lingvo-online.ru (grab date: Aug2014) keyword of LingvoUniversal (En-Ru) 2008';
+my $version = 'www.lingvo-online.ru (grab date: Aug2014) keyword of Universal (Ru-En) 2004';
+#my $version = 'www.lingvo-online.ru (grab date: Aug2014) keyword of LingvoUniversal (En-Ru) 2008';
 
 my $alias  = 'Lingvo';
 
-#my $source = 'ru';
-my $source = 'en';
+my $source = 'ru';
+#my $source = 'en';
 
-#my $target = 'en';
-my $target = 'ru';
+my $target = 'en';
+#my $target = 'ru';
 
-#my $dictionary_name = 'Universal+(Ru-En)';
-my $dictionary_name = 'LingvoUniversal+(En-Ru)';
+my $dictionary_name = 'Universal+(Ru-En)';
+#my $dictionary_name = 'LingvoUniversal+(En-Ru)';
 
 my $domain = 'http://www.lingvo-online.ru';
 my $url = '/ru/Search/Translate/FullLingvoArticle?dictionarySystemName=';
@@ -102,7 +102,7 @@ while (my $word = <IN>) {
         my $dict_name = uri_decode($2);
         my $file_path = '/'.$dict_name.'/'.substr($file_name,0,1).'/'.$file_name;
         make_path($sound_dir, $file_path);
-        get_url($domain.$url_link, ':content_file' => $sound_dir.$file_path);
+        get_url($domain.$url_link, ':content_file' => $sound_dir.$file_path)
     }
     
     $load_basic->execute($word, $article, $source, $target, $dictionary, $version, $alias);
@@ -138,7 +138,9 @@ sub get_url {
     my $res = $ua->get($request, @options);
     my $n = 0;
     while (!$res->is_success) {
-        print STDERR $res->status_line, "\n";
+        my $status = $res->status_line;
+        print STDERR $status, "\n";
+        #return if $status =~ m/404 /;
         sleep 3;
         $res = $ua->get($request);
         die "ERROR: request fault ($request)\n" if ++$n > 3;
