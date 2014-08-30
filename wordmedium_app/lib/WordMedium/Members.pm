@@ -88,8 +88,8 @@ sub signup {
             my $end = $d->begin();
             my $crptpass = $self->bcrypt($pass);
             $self->core->do({
-                sql => q{INSERT IGNORE INTO user VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)},
-                val => ['\N', $uname, $email, $crptpass],
+                sql => q{INSERT IGNORE INTO user (uname, email, pass, created) VALUES (?, ?, ?, NOW())},
+                val => [$uname, $email, $crptpass],
                 cb => sub { $end->();}
             });
         },
