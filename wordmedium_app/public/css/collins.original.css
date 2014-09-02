@@ -1,11 +1,11 @@
-collins div,collins span,collins object,collins iframe,collins h1,collins h2,collins h3,collins h4,collins h5,collins h6,collins p,collins blockquote,collins pre,collins abbr,collins address,collins cite,collins code,collins del,collins dfn,collins em,collins img,collins ins,collins kbd,collins q,collins samp,collins small,collins strong,collins sub,collins sup,collins var,collins b,collins i,collins dl,collins dt,collins dd,collins ol,collins ul,collins li,collins fieldset,collins form,collins label,collins legend,collins table,collins caption,collins tbody,collins tfoot,collins thead,collins tr,collins th,collins td,collins article,collins aside,collins canvas,collins details,collins figcaption,collins figure,collins footer,collins header,collins hgroup,collins menu,collins nav,collins section,collins summary,collins time,collins mark,collins audio,collins video {
+html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,abbr,address,cite,code,del,dfn,em,img,ins,kbd,q,samp,small,strong,sub,sup,var,b,i,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,figcaption,figure,footer,header,hgroup,menu,nav,section,summary,time,mark,audio,video {
     margin:0;
     padding:0;
     border:0;
     font:inherit;
     vertical-align:baseline
 }
-collins article,collins aside,collins details,collins figcaption,collins figure,collins footer,collins header,collins hgroup,collins menu,collins nav,collins section {
+article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section {
     display:block
 }
 ins {

@@ -12,6 +12,7 @@ use JSON qw( decode_json from_json );
 use Mojo::DOM;
 
 ###################################
+my $source_dict_table = 'source_lingvo_www_ru_en';
 my $db_name = 'wm_dict';
 my $host = 'localhost';
 my $login = 'root';
@@ -30,7 +31,7 @@ $dbh->do(q/CREATE TABLE IF NOT EXISTS `dict_lingvo` (
          `target` varchar(3) DEFAULT NULL,
          `dictionary` varchar(128) DEFAULT NULL,
          `version` varchar(128) DEFAULT NULL,
-         `alias` varchar(24) DEFAULT NULL,
+         `alias` varchar(32) DEFAULT NULL,
          `like` int(11) NOT NULL DEFAULT '0',
          `error` int(11) NOT NULL DEFAULT '0',
          `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -39,26 +40,24 @@ $dbh->do(q/CREATE TABLE IF NOT EXISTS `dict_lingvo` (
        ) ENGINE=MyISAM DEFAULT CHARSET=utf8
 /);
 
-my $select_article = $dbh->prepare(q/SELECT * FROM `dic_lingvo_www` WHERE keyword = 'run'/);
+my $select_article = $dbh->prepare(qq/SELECT * FROM $source_dict_table ORDER BY keyword/);
 my $load_article = $dbh->prepare(q/INSERT INTO `dict_lingvo` (keyword, body, source, target, dictionary, version, alias) VALUES (?, ?, ?, ?, ?, ?, ?)/);
 
 my %classes = (); # collect lingvo css classes
 
 # lingvo container tags
-my $tags_before = '<div class="l-article js-article-lingvo"><div class="js-article-html g-card">';
-my $tags_after = '</div></div>';
+my $tags_before = '<div class="l-article g-card">';
+my $tags_after = '</div>';
 
 $select_article->execute();
 while (my ($id, $keyword, $article, $source, $target, $dictionary, $version, $alias) = $select_article->fetchrow_array()) {
-    my $html = ${from_json($article)}{article};
-    $html =~ s/\s+/ /sg;
-    $html =~ s/Развернуть статью/Expand the entry/sg;
+    $article =~ s/Развернуть статью/Expand the entry/sg;
        
-    my $dom = Mojo::DOM->new($html);
+    my $dom = Mojo::DOM->new($article);
     
-    #
-    for my $data ($dom->find('span[class="l-article__expandcollapse js-text"]')->each) {
-        $data->content('<span class="l-article__expand hidden">Expand the entry</span><span class="l-article__collapse">Collapse the entry</span>');
+    # remake expand/collapse toggle
+    for my $data ($dom->find('a[class="l-article__expandcollapse-link js-article-button"]')->each) {
+        $data->content('<span class="l-article__expand hide"><span class="g-icons g-iblock l-article__toggle__icon"></span> Expand the entry</span><span class="l-article__collapse"><span class="g-icons g-iblock l-article__toggle__icon expanded"></span> Collapse the entry</span>');
     }
     
     # replace word tooltips
@@ -66,24 +65,46 @@ while (my ($id, $keyword, $article, $source, $target, $dictionary, $version, $al
         $data->attr('title' => '');
     }
     # replace the transcription image by the text
-    for my $data ($dom->find('img[class="l-article__transcription"]')->each) {
-        my $src = $data->attr('src');
-        $src =~ s/\/transcription.gif\?Text=//;
-        $src = uri_decode(encode("utf8", $src));
-        $src = decode("utf8", $src);
-        $data->replace(qq#<span class="l-article__transcription_text">$src</span>#);
+    for my $p ($dom->find('p')->each) {
+        my $is_transcr = 0;
+        for my $data ($p->find('img[class="l-article__transcription"]')->each) {
+            my $src = $data->attr('src');
+            $src =~ s/.*\/transcription.gif\?Text=//;
+            $src = uri_decode(encode("utf8", $src));
+            $src = decode("utf8", $src);
+            $data->replace(qq#<span class="l-article__transcription_text">$src</span>#);
+            $is_transcr = 1; 
+        }
+        # add a class attribute to brackets and slashes in the transcription block
+        if ($is_transcr) {
+            my $string = $p->to_string;
+            $string =~ s/>(\s*)\[(\s*)</>$1<span class="l-article__transcription_lbracket">\[<\/span>$2</sg;
+            $string =~ s/>(\s*)\](\s*)</>$1<span class="l-article__transcription_rbracket">\]<\/span>$2</sg;
+            $string =~ s/>(\s*)\/(\s*)</>$1<span class="l-article__transcription_slash">\/<\/span>$2</sg;
+            $p->replace($string);
+        }
     }
     # clean the flash content but remain 'data-flash-url' attribute that keeps a path to the sound file
     for my $data ($dom->find('span[class="l-article__sound"]')->each) {
-        $data->find('span[class="jp-jplayer"]')->children->remove;
+        for my $jplayer ($data->find('span[class="jp-jplayer"]')) {
+            my $url = $jplayer->attr('data-flash-url');
+            $url =~ s/.*\?/\/members\/dictionary\/sound\?/;
+            $jplayer->replace(qq#<span class="audio-link" data-url="$url"><audio></audio></span>#);
+        }
         $data->find('span[class="js-lingvo-sound jp-audio"]')->remove;
     }
+    # clean the dictionary info link
+    for my $data ($dom->find('a[class="g-iblock l-article__linkdict js-dictionary-popup-trigger"]')->each) {
+        my $dict_name = $data->text;
+        $data->replace('<span class="g-iblock l-article__linkdict">'.$dict_name.'</span>');
+    }
     
-    $html = $dom->to_string;
-    
+    my $html = $dom->to_string;
+
     my $body = $tags_before.$html.$tags_after;
     $load_article->execute($keyword, $body, $source, $target, $dictionary, $version, $alias) || die "ERROR: insertion fault - $keyword\n";
     
+    # collect classes
     while ($body =~ m/class\s*=\s*"([^"]+)"/g) {
         map {$classes{$_} = 1} split(/\s+/, $1);
     }
