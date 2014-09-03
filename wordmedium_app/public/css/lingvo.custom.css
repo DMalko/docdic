@@ -204,6 +204,7 @@
        display: inline-block;
        background: url('/data/webprojects/DocDic.Project/docdic/wordmedium_app/public/img/speaker.png') no-repeat center;
        background-size:25px 25px;
+       cursor: pointer;
 }
 
 .l-article .g-icons {

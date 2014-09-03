@@ -10,6 +10,7 @@ use Net::SMTP::SSL;
 # 4. Net::SMTP::SSL (instead of sendmail-dependent Mojolicious::Plugin::Mail)
 # 5. Mojo::IOLoop::ForkCall (run blocking functions asynchronously by forking)
 # 6. Mojo::IOLoop::Delay (run non-blocking functions sequentially)
+# 7. Mojolicious::Plugin::RenderFile (it does not read file in memory and just streaming it to a client)
 
 #$ENV{MOJO_MODE} = 'production';
 $ENV{MOJO_MODE} = 'development';

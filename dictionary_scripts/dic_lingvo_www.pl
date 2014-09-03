@@ -8,7 +8,7 @@ use utf8;
 use DBI;
 use URI::Encode qw(uri_encode uri_decode);
 use Encode qw (encode decode);
-use JSON qw( decode_json from_json );
+use MIME::Base64 qw(encode_base64 decode_base64);
 use Mojo::DOM;
 
 ###################################
@@ -17,7 +17,7 @@ my $db_name = 'wm_dict';
 my $host = 'localhost';
 my $login = 'root';
 my $password = '';
-my $clean = 1;
+my $clean = 0;
 ###################################
 
 my $dbh = DBI->connect("DBI:mysql:$db_name:$host;mysql_local_infile=1", $login, $password, {RaiseError => 1, PrintError => 0, mysql_enable_utf8 => 1}) || die "$DBI::err($DBI::errstr)\n";
@@ -87,9 +87,15 @@ while (my ($id, $keyword, $article, $source, $target, $dictionary, $version, $al
     # clean the flash content but remain 'data-flash-url' attribute that keeps a path to the sound file
     for my $data ($dom->find('span[class="l-article__sound"]')->each) {
         for my $jplayer ($data->find('span[class="jp-jplayer"]')) {
-            my $url = $jplayer->attr('data-flash-url');
-            $url =~ s/.*\?/\/members\/dictionary\/sound\?/;
-            $jplayer->replace(qq#<span class="audio-link" data-url="$url"><audio></audio></span>#);
+            my $link = $jplayer->attr('data-flash-url');
+            if ($link =~ m/FileName=([^'&]+)/i) {
+                my $fname = decode_base64($1);
+                $fname =~ s/\.[^.]+$//;
+                my $url = '/members/dictionary/sound?FileName='.encode_base64($fname, '').'&DictionaryName='.uri_encode($dictionary);
+                $jplayer->replace(qq#<span class="audio-link" data-url="$url"><audio></audio></span>#);
+            } else {
+                die "ERROR: wrong sound link for `$keyword` ($link)\n";
+            }
         }
         $data->find('span[class="js-lingvo-sound jp-audio"]')->remove;
     }

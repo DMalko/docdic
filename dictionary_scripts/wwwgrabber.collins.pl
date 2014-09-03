@@ -91,8 +91,8 @@ for my $word_set_link ($dom->find('div[class="alphabet_wrapper alphabets"] a')->
             next if is_stored($word);
             
             for my $url_link (find_sound_links(\$content)) {
-                make_path($sound_dir, $url_link);
                 next if -e $sound_dir.$url_link;
+                make_path($sound_dir, $url_link);
                 get_url($domain.$url_link, ':content_file' => $sound_dir.$url_link);
             }
             write_to_db($word, \$content);
@@ -106,8 +106,8 @@ for my $word_set_link ($dom->find('div[class="alphabet_wrapper alphabets"] a')->
                 my $content = get_url($article_link);
                 #$content = decode("utf8", $content);
                 for my $url_link (find_sound_links(\$content)) {
-                    make_path($sound_dir, $url_link);
                     next if -e $sound_dir.$url_link;
+                    make_path($sound_dir, $url_link);
                     get_url($domain.$url_link, ':content_file' => $sound_dir.$url_link);
                 }
                 write_to_db($word, \$content);
@@ -165,7 +165,8 @@ sub html_washer {
     my $dom = Mojo::DOM->new($$html);
     $$html = undef;
     for my $data ($dom->find('div[class="definition_content col main_bar"]')->each) {
-        for my $garbage ($data->children('div[class="term-subsec"]')->each) {
+        #for my $garbage ($data->children('div[class="term-subsec"]')->each) { # IT WILL ALSO REMOVE EXAMPLE BLOCK IN DICTIONARIES!!!
+        for my $garbage ($data->children('#advert_box')->each) {
             $garbage->remove;
         }
         for my $garbage ($data->children('script')->each) {
