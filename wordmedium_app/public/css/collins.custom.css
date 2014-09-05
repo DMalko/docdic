@@ -1,36 +1,36 @@
-html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,abbr,address,cite,code,del,dfn,em,img,ins,kbd,q,samp,small,strong,sub,sup,var,b,i,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,figcaption,figure,footer,header,hgroup,menu,nav,section,summary,time,mark,audio,video {
+collins,.collins div,.collins span,.collins object,.collins iframe,.collins h1,.collins h2,.collins h3,.collins h4,.collins h5,.collins h6,.collins p,.collins blockquote,.collins pre,.collins abbr,.collins address,.collins cite,.collins code,.collins del,.collins dfn,.collins em,.collins img,.collins ins,.collins kbd,.collins q,.collins samp,.collins small,.collins strong,.collins sub,.collins sup,.collins var,.collins b,.collins i,.collins dl,.collins dt,.collins dd,.collins ol,.collins ul,.collins li,.collins fieldset,.collins form,.collins label,.collins legend,.collins table,.collins caption,.collins tbody,.collins tfoot,.collins thead,.collins tr,.collins th,.collins td,.collins article,.collins aside,.collins canvas,.collins details,.collins figcaption,.collins figure,.collins footer,.collins header,.collins hgroup,.collins menu,.collins nav,.collins section,.collins summary,.collins time,.collins mark,.collins audio,.collins video {
     margin:0;
     padding:0;
     border:0;
     font:inherit;
     vertical-align:baseline
 }
-article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section {
+.collins article,.collins aside,.collins details,.collins figcaption,.collins figure,.collins footer,.collins header,.collins hgroup,.collins menu,.collins nav,.collins section {
     display:block
 }
-ins {
+.collins ins {
     background-color:#ff9;
     color:#000;
     text-decoration:none
 }
-mark {
+.collins mark {
     background-color:#ff9;
     color:#000;
     font-style:italic;
     font-weight:bold
 }
-del {
+.collins del {
     text-decoration:line-through
 }
-abbr[title],dfn[title] {
+.collins abbr[title],.collins dfn[title] {
     border-bottom:1px dotted;
     cursor:help
 }
-table {
+.collins table {
     border-collapse:collapse;
     border-spacing:0
 }
-hr {
+.collins hr {
     display:block;
     height:1px;
     border:0;
@@ -38,171 +38,166 @@ hr {
     margin:1em 0;
     padding:0
 }
-html,body {
+.collins {
     height:100%
-}
-body {
     font:12px/1.231 sans-serif;
     *font-size:small;
     color:#000000
 }
-pre,code,kbd,samp {
+.collins pre,.collins code,.collins kbd,.collins samp {
     font-family:monospace, sans-serif
 }
-img {
+.collins img {
     display:block
 }
-a:hover,a:active {
+.collins a:hover,.collins a:active {
     outline:none
 }
-ol {
+.collins ol {
     list-style-type:decimal
 }
-nav ul,nav li {
+.collins nav ul,.collins nav li {
     margin:0;
     list-style:none;
     list-style-image:none
 }
-small {
+.collins small {
     font-size:85%
 }
-strong,th {
+.collins strong,.collins th {
     font-weight:bold
 }
-.smallcaps {
+.collins .smallcaps {
     font-variant: small-caps;
     text-transform: lowercase;
 }
-.underline {
+.collins .underline {
     text-decoration:underline;
 }
-td {
+.collins td {
     vertical-align:top
 }
-sub,sup {
+.collins sub,.collins sup {
     font-size:75%;
     line-height:0;
     position:relative
 }
-sup {
+.collins sup {
     top:-0.5em
 }
-sub {
+.collins sub {
     bottom:-0.25em
 }
-pre {
+.collins pre {
     white-space:pre;
     white-space:pre-wrap;
     word-wrap:break-word;
     padding:15px
 }
-a:link {
+.collins a:link {
     -webkit-tap-highlight-color:#FF5E99
 }
-body,select,input,textarea {
-    color:#444
-}
-h1,h2,h3,h4,h5,h6 {
+.collins h1,.collins h2,.collins h3,.collins h4,.collins h5,.collins h6 {
     color:#194885
 }
-a,a:active,a:visited {
+.collins a,.collins a:active,.collins a:visited {
     color:#1c4b8b
 }
-a:hover {
+.collins a:hover {
     color:#036
 }
-.clear:before,.clear:after {
+.collins .clear:before,.collins .clear:after {
     content:" ";
     display:block;
     height:0;
     overflow:hidden
 }
-.clear:after {
+.collins .clear:after {
     clear:both
 }
-a {
+.collins a {
     color:#1c4b8b
 }
-a:hover {
+.collins a:hover {
     color:#d51f30
 }
-.main_bar {
+.collins .main_bar {
     width:640px;
     margin-right:10px
 }
-.definition_wrapper{
+.collins .definition_wrapper{
     margin:10px auto 0;
     width:960px;
     position:relative
 }
-.definition_main{
+.collins .definition_main{
     clear:both;
     overflow:hidden
 }
-p,li {
+.collins p,.collins li {
     line-height:1.5
 }
-body {
+.collins {
     color:#505050;
     font:13px/1.231 sans-serif;
     height:100%
 }
-h1,h2,h3,h4,h5,h6 {
+.collins h1,.collins h2,.collins h3,.collins h4,.collins h5,.collins h6 {
     font-family:"Times New Roman",Times,serif;
     font-weight:normal;
     margin-bottom:0.5em
 }
-h1 {
+.collins h1 {
     font-size:182%;
     margin-bottom:0.75em
 }
-p {
+.collins p {
     margin-bottom:1em
 }
-ul {
+.collins ul {
     list-style:disc inside none;
     padding:0
 }
-li {
+.collins li {
     padding-bottom:4px
 }
-.col {
+.collins .col {
     float:left
 }
-.dictionary .dictionary_header .tagline {
+.collins.dictionary .dictionary_header .tagline {
     font-size:22px
 }
-.dictionary {
+.collins.dictionary {
     margin:0px auto;
     width:960px
 }
-.dictionary .translation_list span {
+.collins.dictionary .translation_list span {
     font-family:Arial,Helvetica,sans-serif
 }
-.dictionary .translation_list .translation {
+.collins.dictionary .translation_list .translation {
     float:left;
     list-style-type:none;
     margin-right:24px;
     width:45%
 }
-.dictionary .translation_list li[lang~="lang_en-gb"],.dictionary .translation_list li[lang~="lang_en-us"] {
+.collins.dictionary .translation_list li[lang~="lang_en-gb"],.dictionary .translation_list li[lang~="lang_en-us"] {
     display:block;
     float:none;
     padding:0 0 20px;
     width:auto
 }
-.dictionary blockquote,.dictionary q {
+.collins.dictionary blockquote,.collins.dictionary q {
     quotes:none;
     color:#1C4B8B;
     font-style:italic
 }
-.dictionary .orth {
+.collins.dictionary .orth {
     color:#194885
 }
-.dictionary .pron {
+.collins.dictionary .pron {
     font-family:"Arial Unicode MS",Arial,Helvetica,sans-serif
 }
-.dictionary h2.orth {
+.collins.dictionary h2.orth {
     font-family:"Times New Roman",Times,serif;
     border-color:#c5c5c5;
     border-style:dotted;
@@ -211,16 +206,16 @@ li {
     padding:15px 0 10px 15px;
     position:relative
 }
-.dictionary h2.orth span {
+.collins.dictionary h2.orth span {
     font-size:20px
 }
-.dictionary h2.orth .pron {
+.collins.dictionary h2.orth .pron {
     color:#194885;
     font-size:20px;
     font-style:normal;
     margin-left:5px
 }
-.dictionary h2.orth sup.homnum {
+.collins.dictionary h2.orth sup.homnum {
     background-color:#1c4b8b;
     color:#FFFFFF;
     font-family:Arial,Helvetica,sans-serif;
@@ -231,166 +226,166 @@ li {
     position:absolute;
     top:0
 }
-.dictionary h2.orth .subj,.dictionary h2.orth .register,.dictionary h2.orth .misc,.dictionary h2.orth .gram,.dictionary h2.orth .lbgramdesc,.dictionary h2.orth .lbmisc,.dictionary h2.orth .lbl,.dictionary h2.orth .geo,.dictionary h2.orth .mod,.dictionary h2.orth .subc,.dictionary h2.orth .lang,.dictionary h2.orth em.italics {
+.collins.dictionary h2.orth .subj,.collins.dictionary h2.orth .register,.collins.dictionary h2.orth .misc,.collins.dictionary h2.orth .gram,.collins.dictionary h2.orth .lbgramdesc,.collins.dictionary h2.orth .lbmisc,.collins.dictionary h2.orth .lbl,.collins.dictionary h2.orth .geo,.collins.dictionary h2.orth .mod,.collins.dictionary h2.orth .subc,.collins.dictionary h2.orth .lang,.collins.dictionary h2.orth em.italics {
     font-family:Times,serif;
     color:#000;
     font-style:italic;
     font-size:22px;
     font-weight:normal
 }
-.dictionary h3 {
-    background:url("/static/graphics/icons-left.png") no-repeat scroll 0 -982px transparent;
+.collins.dictionary h3 {
+    background:url("/data/webprojects/DocDic.Project/docdic/wordmedium_app/public/img/collins-icons-left.png") no-repeat scroll 0 -982px transparent;
     color:#1c4b8b;
     font-family:"Times New Roman",Times,serif;
     font-size:153.9%;
     margin-bottom:0.2em;
     padding:11px 0 6px 15px
 }
-.dictionary h4 {
+.collins.dictionary h4 {
     font-size:20px;
     margin-top:10px;
     padding-left:15px
 }
-.dictionary h4 span {
+.collins.dictionary h4 span {
     font-size:20px
 }
-.dictionary h4.gramGrp {
+.collins.dictionary h4.gramGrp {
     color:#194885;
     font-style:normal;
     font-size:20px
 }
-.dictionary .posnum {
+.collins.dictionary .posnum {
     color:#194885;
     font-family:"Times New Roman",Times,serif;
     font-style:normal;
     font-size:20px
 }
-.dictionary .submit,.dictionary .editorial .submit,.dictionary .submit-hover,.dictionary .editorial .submit-hover {
-    background:url("/static/graphics/icons-right.png") no-repeat scroll -33px -591px #1c4b8b;
+.collins.dictionary .submit,.collins.dictionary .editorial .submit,.collins.dictionary .submit-hover,.collins.dictionary .editorial .submit-hover {
+    background:url("/data/webprojects/DocDic.Project/docdic/wordmedium_app/public/img/icons-right.png") no-repeat scroll -33px -591px #1c4b8b;
     border:medium none;
     color:#FFFFFF;
     cursor:pointer;
     float:right;
     padding:6px 20px 4px 10px
 }
-.dictionary .breadcrumb .hom {
+.collins.dictionary .breadcrumb .hom {
     display:inline;
     white-space:nowrap
 }
-.dictionary .breadcrumb .hightlight {
+.collins.dictionary .breadcrumb .hightlight {
     text-decoration:none
 }
-.dictionary .search-found a {
+.collins.dictionary .search-found a {
     margin-right:5px
 }
-.dictionary .highlight {
+.collins.dictionary .highlight {
     background-color:#E5EBF3;
     margin-right:5px;
     padding:4px 5px
 }
-.dictionary .hom {
+.collins.dictionary .hom {
     display:block;
     margin-bottom:5px
 }
-.dictionary .hom li ol,.dictionary .hom li ul {
+.collins.dictionary .hom li ol,.collins.dictionary .hom li ul {
     margin-left:25px;
     margin-top:7px
 }
-.dictionary .hom li ol li {
+.collins.dictionary .hom li ol li {
     display:list-item;
     list-style-type:lower-alpha
 }
-.dictionary .gramGrp {
+.collins.dictionary .gramGrp {
     color:#505050;
     font-style:italic;
     font-size:110%;
     font-family:"Times New Roman",Times,serif
 }
-.dictionary .sense_list li.level_1 {
+.collins.dictionary .sense_list li.level_1 {
     margin-bottom:7px
 }
-.dictionary .sense_sublist {
+.collins.dictionary .sense_sublist {
     margin-left:25px
 }
-.dictionary .sense_sublist li {
+.collins.dictionary .sense_sublist li {
     list-style-type:lower-alpha
 }
-.dictionary em.italics,.dictionary em.hi {
+.collins.dictionary em.italics,.collins.dictionary em.hi {
     font-style:italic
 }
-.dictionary .lbl,.dictionary .xr_lbl,.dictionary .subj,.dictionary .sense,.dictionary .mod,.dictionary .geo,.dictionary .misc,.dictionary .register,.dictionary .gram,.dictionary .subc {
+.collins.dictionary .lbl,.collins.dictionary .xr_lbl,.collins.dictionary .subj,.collins.dictionary .sense,.collins.dictionary .mod,.collins.dictionary .geo,.collins.dictionary .misc,.collins.dictionary .register,.collins.dictionary .gram,.collins.dictionary .subc {
     font-family:"Times New Roman",Times,serif;
     font-size:14px;
     font-style:italic;
     font-weight:normal;
     color:#505050
 }
-.dictionary .syntax {
+.collins.dictionary .syntax {
     font-style:normal;
 }
-.dictionary .etym em.hi {
+.collins.dictionary .etym em.hi {
     font-style:italic
 }
-.dictionary #synonyms_content {
+.collins.dictionary #synonyms_content {
     clear:both
 }
-.dictionary #synonyms_content .thesaurus_synonyms {
+.collins.dictionary #synonyms_content .thesaurus_synonyms {
     margin:0 0 8px
 }
-.dictionary #synonyms_content span.first {
+.collins.dictionary #synonyms_content span.first {
     font-weight:bold
 }
-.dictionary #quotation_box ul {
+.collins.dictionary #quotation_box ul {
     list-style-position:outside;
     margin-left:15px
 }
-.dictionary #quotation_box q {
+.collins.dictionary #quotation_box q {
     color:#505050;
     font-style:normal
 }
-.dictionary #quotation_box cite.bibl {
+.collins.dictionary #quotation_box cite.bibl {
     display:inline;
     font-style:normal
 }
-.dictionary #examples_box div {
+.collins.dictionary #examples_box div {
     margin-bottom:10px
 }
-.dictionary #examples_box div blockquote {
+.collins.dictionary #examples_box div blockquote {
     color:inherit;
     font-style:normal;
     color:#194480
 }
-.dictionary #examples_box div cite {
+.collins.dictionary #examples_box div cite {
     font-style:normal
 }
-.dictionary #examples_box div .author {
+.collins.dictionary #examples_box div .author {
     font-weight:bold
 }
-.dictionary #examples_box div .title {
+.collins.dictionary #examples_box div .title {
     text-transform:uppercase
 }
-.dictionary .sound {
+.collins.dictionary .sound {
     display:inline;
     margin:0 5px
 }
-.dictionary .spread_the_word {
+.collins.dictionary .spread_the_word {
     height:111px
 }
-.dictionary ul.translation_list {
+.collins.dictionary ul.translation_list {
     padding:15px 0;
     border-top:1px solid #c5c5c5
 }
-.dictionary ul.translation_list:first-child {
+.collins.dictionary ul.translation_list:first-child {
     padding:0 0 15px;
     border:0
 }
-.dictionary .user_comments,.dictionary .have_your_say {
+.collins.dictionary .user_comments,.collins.dictionary .have_your_say {
     padding:0 0 20px 15px
 }
-.dictionary .user_comments h2,.dictionary .have_your_say h2 {
+.collins.dictionary .user_comments h2,.collins.dictionary .have_your_say h2 {
     color:#194480
 }
-.dictionary .semantic {
+.collins.dictionary .semantic {
     color:black;
     line-height:1.4em;
     font-style:normal;
@@ -401,156 +396,156 @@ li {
     font-weight:normal;
     display:block
 }
-.dictionary .sense_list .lbl {
+.collins.dictionary .sense_list .lbl {
     color:#7a5352
 }
-.definition_content h2,.definition_content h3,.definition_content h4 {
+.collins .definition_content h2,.collins .definition_content h3,.collins .definition_content h4 {
     font-family:"Times New Roman",Times,serif
 }
-h2 .pos {
+.collins h2 .pos {
     color:black
 }
-.var {
+.collins .var {
     font-weight:bold;
     color:#194885
 }
-.dictionary .inflected_forms span.infl {
+.collins.dictionary .inflected_forms span.infl {
     color:#505050;
     font-weight:bold
 }
-.dictionary .re.hom-subsec span.infl {
+.collins.dictionary .re.hom-subsec span.infl {
     color:#505050;
     font-weight:bold
 }
-.drv {
+.collins .drv {
     font-weight:bold;
     color:#505050;
     font-size:116%
 }
-.hom-subsec {
+.collins .hom-subsec {
     border-top:1px dotted #c5c5c5;
     padding:11px 0 20px 15px;
     position:relative
 }
-.hom-subsec.definitions,.hom-subsec.similar-words,.hom-subsec.translations {
+.collins .hom-subsec.definitions,.collins .hom-subsec.similar-words,.collins .hom-subsec.translations {
     border:medium none
 }
-.hom-subsec h3 {
+.collins .hom-subsec h3 {
     background-position:0 -993px;
     margin-left:-15px;
     padding-top:0
 }
-.hom-subsec h4 {
+.collins .hom-subsec h4 {
     padding-left:0
 }
-.hom-subsec h5.scbold {
+.collins .hom-subsec h5.scbold {
     margin-top:0.5em
 }
-.hom-subsec ol {
+.collins .hom-subsec ol {
     list-style-position:outside;
     margin:0 0 0 26px
 }
-.hom-subsec ul {
+.collins .hom-subsec ul {
     list-style:none;
     margin:0 0 0 16px
 }
-.hom-subsec .link-right {
+.collins .hom-subsec .link-right {
     margin:11px 0 0;
     position:absolute;
     right:0;
     top:4px
 }
-.hom-subsec .hom-subcontent {
+.collins .hom-subsec .hom-subcontent {
     padding-left:0
 }
-.term-subsec {
+.collins .term-subsec {
     padding:0 0 20px 15px
 }
-.term-subsec h2 {
-    background:url("/static/graphics/icons-left.png") no-repeat scroll 0 -985px transparent;
+.collins .term-subsec h2 {
+    background:url("/data/webprojects/DocDic.Project/docdic/wordmedium_app/public/img/collins-icons-left.png") no-repeat scroll 0 -985px transparent;
     border:1px dotted #c5c5c5;
     border-width:1px 0;
     font-size:153.9%;
     margin:0 0 20px -15px;
     padding:8px 0 6px 15px
 }
-.translations .phr,.translations .minimalunit,.translations .lexstring {
+.collins .translations .phr,.collins .translations .minimalunit,.collins .translations .lexstring {
     color:#505050;
     font-weight:bold
 }
-.translations q {
+.collins .translations q {
     color:#505050;
     font-style:normal
 }
-.translations .cit-type-translation .quote q {
+.collins .translations .cit-type-translation .quote q {
     color:#1C4B8B;
     font-weight:normal
 }
-.translations .cit-type-translation .quote em.hi {
+.collins .translations .cit-type-translation .quote em.hi {
     color:#505050;
     font-family:"Times New Roman",Times,serif;
     font-size:110%;
     font-style:italic;
     font-weight:normal
 }
-.translations .cit-type-example {
+.collins .translations .cit-type-example {
     color:#505050
 }
-.translations .cit-type-example .quote {
+.collins .translations .cit-type-example .quote {
     font-weight:bold
 }
-.translations .cit-type-example .cit-type-translation q {
+.collins .translations .cit-type-example .cit-type-translation q {
     color:#1C4B8B;
     font-weight:normal
 }
-.translations .cit q .lbl {
+.collins .translations .cit q .lbl {
     color:#505050;
     font-weight:normal
 }
-.translations .gramGrp .colloc {
+.collins .translations .gramGrp .colloc {
     color:#505050;
     font-family:"Times New Roman",Times,serif;
     font-size:14px;
     font-style:italic;
     font-weight:normal
 }
-.translations .phr .orth {
+.collins .translations .phr .orth {
     color:#505050;
     font-weight:bold
 }
-.translations .orth q {
+.collins .translations .orth q {
     font-weight:bold
 }
-.dictionary .inflected_forms {
+.collins.dictionary .inflected_forms {
     padding-left:20px;
     margin-bottom:20px;
     font-size:126%
 }
-.dictionary .hom .inflected_forms {
+.collins.dictionary .hom .inflected_forms {
     margin-bottom:20px;
     padding-left:0;
     font-size:116%
 }
-.dictionary .hom .inflected_forms .var {
+.collins.dictionary .hom .inflected_forms .var {
     font-size:14px;
     font-weight:normal;
     font-family:"Times New Roman",Times,serif
 }
-.dictionary .hom .inflected_forms .infl {
+.collins.dictionary .hom .inflected_forms .infl {
     font-size:13px;
     color:#194885
 }
-.definition_wrapper .definition_main .definition_sidebar {
+.collins .definition_wrapper .definition_main .definition_sidebar {
     border-top:1px dotted #c5c5c5
 }
-.definition_wrapper .definition_sub_header {
+.collins .definition_wrapper .definition_sub_header {
     overflow:hidden;
     clear:both
 }
-.definition_wrapper .definition_sub_header .commonness * {
+.collins .definition_wrapper .definition_sub_header .commonness * {
     float:left
 }
-.definition_wrapper .definition_sub_header .commonness h2 {
+.collins .definition_wrapper .definition_sub_header .commonness h2 {
     font-family:Arial,Helvetica,sans-serif;
     color:#505050;
     margin:0;
@@ -560,16 +555,16 @@ h2 .pos {
     background:#fff;
     line-height:1.5
 }
-.definition_wrapper .definition_sub_header .commonness div {
+.collins .definition_wrapper .definition_sub_header .commonness div {
     position:relative;
     top:-12px
 }
-.dictionary .dropdown-label {
+.collins.dictionary .dropdown-label {
     float:left;
     margin-top:8px;
     margin-left:12px
 }
-.dictionary .expandable-list-container {
+.collins.dictionary .expandable-list-container {
     float:right;
     height:27px;
     margin-top:2px;
@@ -578,8 +573,8 @@ h2 .pos {
     position:absolute;
     right:10px
 }
-.dictionary .expandable-list-control {
-    background:url("/static/graphics/icons-right.png") no-repeat scroll 100% -1198px transparent;
+.collins.dictionary .expandable-list-control {
+    background:url("/data/webprojects/DocDic.Project/docdic/wordmedium_app/public/img/collins-icons-right.png") no-repeat scroll 100% -1198px transparent;
     border:medium none;
     cursor:pointer;
     height:27px;
@@ -589,7 +584,7 @@ h2 .pos {
     width:26px;
     z-index:2
 }
-.dictionary .expandable-list {
+.collins.dictionary .expandable-list {
     background:none repeat scroll 0 0 #FFFFFF;
     border:1px solid #CCCCCC;
     margin:0 0 10px;
@@ -598,7 +593,7 @@ h2 .pos {
     width:150px;
     z-index:99999
 }
-.dictionary .expandable-list li {
+.collins.dictionary .expandable-list li {
     border-top:1px solid #E5E5E5;
     color:#666666;
     display:block;
@@ -607,15 +602,25 @@ h2 .pos {
     padding:5px 7px;
     background:white
 }
-.dictionary .expandable-list li a {
+.collins.dictionary .expandable-list li a {
     color:#666666;
     display:block;
     text-decoration:none
 }
-.dictionary .expandable-list li a:hover {
+.collins.dictionary .expandable-list li a:hover {
     background-color:transparent;
     color:#194885
 }
-.dictionary .expandable-list li.first {
+.collins.dictionary .expandable-list li.first {
     border-top:medium none
+}
+.collins .audio-link{
+       margin: 2px;
+       width:25px;
+       height:25px;
+       vertical-align: middle;
+       display: inline-block;
+       background: url('/data/webprojects/DocDic.Project/docdic/wordmedium_app/public/img/speaker.png') no-repeat center;
+       background-size:25px 25px;
+       cursor: pointer;
 }
