@@ -87,7 +87,7 @@ for my $word_set_link ($dom->find('div[class="alphabet_wrapper alphabets"] a')->
         #$content = decode("utf8", $content);
         
         my $dom_linkset2 = Mojo::DOM->new($content);
-        if ($dom_linkset2->find('div[class="definition_content col main_bar"]')) {
+        if ($dom_linkset2->find('div[class="definition_content col main_bar"]')->each) {
             next if is_stored($word);
             
             for my $url_link (find_sound_links(\$content)) {
