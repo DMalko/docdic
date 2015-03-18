@@ -5,7 +5,7 @@ use Mojo::Base 'Mojolicious::Controller';
 sub index {
     my $self = shift;
 
-    $self->render_static('index.html');
+    $self->reply->static('index.html');
 }
 
 sub myhome {

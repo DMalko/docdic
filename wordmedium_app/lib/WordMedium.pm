@@ -88,7 +88,7 @@ sub startup {
     $r->route('/test')->to('home#test');
     
     # Private routes to controller #
-    my $members = $r->bridge('/members')->to('members#authenticated');
+    my $members = $r->under('/members')->to('members#authenticated');
     $members->route('/signout')->to('members#signout');
     $members->route('/myhome')->to('home#myhome');
     $members->route('/translate')->to('users#groups')->route->to('dictionary#translate');
