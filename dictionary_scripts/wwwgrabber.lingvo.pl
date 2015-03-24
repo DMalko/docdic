@@ -54,8 +54,8 @@ my $clean = 0;
 
 my $dbh = DBI->connect("DBI:mysql:$db_name:$host;mysql_local_infile=1", $login, $password, {RaiseError => 1, PrintError => 0, mysql_enable_utf8 => 1}) || die "$DBI::err($DBI::errstr)\n";
 
-$dbh->do('DROP TABLE IF EXISTS `dict_lingvo_www`') if $clean;
-$dbh->do('CREATE TABLE IF NOT EXISTS `dict_lingvo_www` (
+$dbh->do('DROP TABLE IF EXISTS `dic_lingvo_www`') if $clean;
+$dbh->do('CREATE TABLE IF NOT EXISTS `dic_lingvo_www` (
             `article_id` int(11) NOT NULL AUTO_INCREMENT,
             `keyword` varchar(128) DEFAULT NULL,
             `article` longtext,
@@ -69,9 +69,9 @@ $dbh->do('CREATE TABLE IF NOT EXISTS `dict_lingvo_www` (
           ) ENGINE=MyISAM DEFAULT CHARSET=utf8'
 );
 
-my $select_max = $dbh->prepare(q/SELECT MAX(article_id) FROM `dict_lingvo_www`/);
-my $select_basic = $dbh->prepare(q/SELECT COUNT(*) FROM `dict_lingvo_www` WHERE BINARY keyword = ?/);
-my $load_basic = $dbh->prepare(q/INSERT INTO `dict_lingvo_www` (keyword, article, source, target, dictionary, version, alias) VALUES (?, ?, ?, ?, ?, ?, ?)/);
+my $select_max = $dbh->prepare(q/SELECT MAX(article_id) FROM `dic_lingvo_www`/);
+my $select_basic = $dbh->prepare(q/SELECT COUNT(*) FROM `dic_lingvo_www` WHERE BINARY keyword = ?/);
+my $load_basic = $dbh->prepare(q/INSERT INTO `dic_lingvo_www` (keyword, article, source, target, dictionary, version, alias) VALUES (?, ?, ?, ?, ?, ?, ?)/);
 
 $select_max->execute();
 my ($n) = $select_max->fetchrow_array();

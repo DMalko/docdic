@@ -69,7 +69,7 @@
 }
 
 .l-article h1, .l-article h2, .l-article h3, .l-article h4, .l-article h5, .l-article h6{
-        margin:0;
+    margin:0;
 	padding:0;
 	border:0;
 }
@@ -202,13 +202,13 @@
        height:25px;
        vertical-align: middle;
        display: inline-block;
-       background: url('/data/webprojects/DocDic.Project/docdic/wordmedium_app/public/img/speaker.png') no-repeat center;
+       background: url('/img/speaker.png') no-repeat center;
        background-size:25px 25px;
        cursor: pointer;
 }
 
 .l-article .g-icons {
-    background: url('/data/webprojects/DocDic.Project/docdic/wordmedium_app/public/img/icons.png') no-repeat scroll 0% 0% transparent;
+    background: url('/img/icons.png') no-repeat scroll 0% 0% transparent;
 }
 
 .l-article .g-iblock {

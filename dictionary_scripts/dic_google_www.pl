@@ -22,7 +22,7 @@ my $password = '';
 
 my $dbh = DBI->connect("DBI:mysql:$db_name:$host;mysql_local_infile=1", $login, $password, {RaiseError => 1, PrintError => 0, mysql_enable_utf8 => 1}) || die "$DBI::err($DBI::errstr)\n";
 
-$dbh->do('DROP TABLE IF EXISTS `dic_google_basic`') if $clean;
+$dbh->do('DROP TABLE IF EXISTS `dict_google_basic`') if $clean;
 $dbh->do('CREATE TABLE IF NOT EXISTS `dic_google_basic` (
         `keyword_id` int(11) NOT NULL AUTO_INCREMENT,
         `keyword` char(128) DEFAULT NULL,
@@ -35,7 +35,7 @@ $dbh->do('CREATE TABLE IF NOT EXISTS `dic_google_basic` (
     )DEFAULT CHARSET=utf8'
 );
 
-$dbh->do('DROP TABLE IF EXISTS `dic_google_trn`') if $clean;
+$dbh->do('DROP TABLE IF EXISTS `dict_google_trn`') if $clean;
 $dbh->do('CREATE TABLE IF NOT EXISTS `dic_google_trn` (
         `trn_id` int(11) NOT NULL AUTO_INCREMENT,
         `keyword_id` int(11) DEFAULT NULL,
@@ -48,7 +48,7 @@ $dbh->do('CREATE TABLE IF NOT EXISTS `dic_google_trn` (
     )DEFAULT CHARSET=utf8'
 );
 
-$dbh->do('DROP TABLE IF EXISTS `dic_google_rtrn`') if $clean;
+$dbh->do('DROP TABLE IF EXISTS `dict_google_rtrn`') if $clean;
 $dbh->do('CREATE TABLE IF NOT EXISTS `dic_google_rtrn` (
         `rtrn_id` int(11) NOT NULL AUTO_INCREMENT,
         `trn_id` int(11) DEFAULT NULL,
@@ -61,16 +61,16 @@ $dbh->do('CREATE TABLE IF NOT EXISTS `dic_google_rtrn` (
     )DEFAULT CHARSET=utf8'
 );
 
-my $load_basic = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_google_basic` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
-my $load_trn = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_google_trn` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
-my $load_rtrn = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dic_google_rtrn` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
+my $load_basic = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dict_google_basic` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
+my $load_trn = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dict_google_trn` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
+my $load_rtrn = $dbh->prepare(q/LOAD DATA LOCAl INFILE ? INTO TABLE `dict_google_rtrn` CHARACTER SET UTF8 FIELDS TERMINATED BY '\r' LINES TERMINATED BY '\r\r'/);
 
 my $query = $dbh->prepare(q/SELECT id, keyword, definition FROM source_google WHERE dictionary = ? ORDER BY id/);
 
 
-my $keyword_id = ($dbh->selectrow_array(q/SELECT MAX(keyword_id) FROM dic_google_basic/))[0];
-my $trn_id = ($dbh->selectrow_array(q/SELECT MAX(trn_id) FROM dic_google_trn/))[0];
-my $rtrn_id = ($dbh->selectrow_array(q/SELECT MAX(rtrn_id) FROM dic_google_rtrn/))[0];
+my $keyword_id = ($dbh->selectrow_array(q/SELECT MAX(keyword_id) FROM dict_google_basic/))[0];
+my $trn_id = ($dbh->selectrow_array(q/SELECT MAX(trn_id) FROM dict_google_trn/))[0];
+my $rtrn_id = ($dbh->selectrow_array(q/SELECT MAX(rtrn_id) FROM dict_google_rtrn/))[0];
 
 $keyword_id ||= 0;
 $trn_id ||= 0;

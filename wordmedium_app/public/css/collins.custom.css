@@ -122,12 +122,12 @@ collins,.collins div,.collins span,.collins object,.collins iframe,.collins h1,.
     color:#d51f30
 }
 .collins .main_bar {
-    width:640px;
+    width:inherit;
     margin-right:10px
 }
 .collins .definition_wrapper{
     margin:10px auto 0;
-    width:960px;
+    width:inherit;
     position:relative
 }
 .collins .definition_main{
@@ -169,7 +169,7 @@ collins,.collins div,.collins span,.collins object,.collins iframe,.collins h1,.
 }
 .collins.dictionary {
     margin:0px auto;
-    width:960px
+    width:inherit;
 }
 .collins.dictionary .translation_list span {
     font-family:Arial,Helvetica,sans-serif
@@ -234,7 +234,7 @@ collins,.collins div,.collins span,.collins object,.collins iframe,.collins h1,.
     font-weight:normal
 }
 .collins.dictionary h3 {
-    background:url("/data/webprojects/DocDic.Project/docdic/wordmedium_app/public/img/collins-icons-left.png") no-repeat scroll 0 -982px transparent;
+    background:url("/img/collins-icons-left.png") no-repeat scroll 0 -982px transparent;
     color:#1c4b8b;
     font-family:"Times New Roman",Times,serif;
     font-size:153.9%;
@@ -261,7 +261,7 @@ collins,.collins div,.collins span,.collins object,.collins iframe,.collins h1,.
     font-size:20px
 }
 .collins.dictionary .submit,.collins.dictionary .editorial .submit,.collins.dictionary .submit-hover,.collins.dictionary .editorial .submit-hover {
-    background:url("/data/webprojects/DocDic.Project/docdic/wordmedium_app/public/img/icons-right.png") no-repeat scroll -33px -591px #1c4b8b;
+    background:url("/img/icons-right.png") no-repeat scroll -33px -591px #1c4b8b;
     border:medium none;
     color:#FFFFFF;
     cursor:pointer;
@@ -462,7 +462,7 @@ collins,.collins div,.collins span,.collins object,.collins iframe,.collins h1,.
     padding:0 0 20px 15px
 }
 .collins .term-subsec h2 {
-    background:url("/data/webprojects/DocDic.Project/docdic/wordmedium_app/public/img/collins-icons-left.png") no-repeat scroll 0 -985px transparent;
+    background:url("/img/collins-icons-left.png") no-repeat scroll 0 -985px transparent;
     border:1px dotted #c5c5c5;
     border-width:1px 0;
     font-size:153.9%;
@@ -574,7 +574,7 @@ collins,.collins div,.collins span,.collins object,.collins iframe,.collins h1,.
     right:10px
 }
 .collins.dictionary .expandable-list-control {
-    background:url("/data/webprojects/DocDic.Project/docdic/wordmedium_app/public/img/collins-icons-right.png") no-repeat scroll 100% -1198px transparent;
+    background:url("/img/collins-icons-right.png") no-repeat scroll 100% -1198px transparent;
     border:medium none;
     cursor:pointer;
     height:27px;
@@ -620,7 +620,7 @@ collins,.collins div,.collins span,.collins object,.collins iframe,.collins h1,.
        height:25px;
        vertical-align: middle;
        display: inline-block;
-       background: url('/data/webprojects/DocDic.Project/docdic/wordmedium_app/public/img/speaker.png') no-repeat center;
+       background: url('/img/speaker.png') no-repeat center;
        background-size:25px 25px;
        cursor: pointer;
 }
