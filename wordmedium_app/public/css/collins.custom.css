@@ -614,7 +614,7 @@ collins,.collins div,.collins span,.collins object,.collins iframe,.collins h1,.
 .collins.dictionary .expandable-list li.first {
     border-top:medium none
 }
-.collins .audio-link{
+.collins .audio-link {
        margin: 2px;
        width:25px;
        height:25px;
@@ -623,4 +623,12 @@ collins,.collins div,.collins span,.collins object,.collins iframe,.collins h1,.
        background: url('/img/speaker.png') no-repeat center;
        background-size:25px 25px;
        cursor: pointer;
+}
+
+.collins.dictionary span.dic-name {
+    color: #595959;
+    float:right;
+    font: 13px/16px Arial,Verdana,Geneva,sans-serif;
+    font-weight: bold;
+    margin: 8px;
 }
