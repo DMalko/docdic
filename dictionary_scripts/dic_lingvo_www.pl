@@ -86,7 +86,7 @@ while (my ($id, $keyword, $article, $source, $target, $dictionary, $version, $al
     }
     # clean the flash content but remain 'data-flash-url' attribute that keeps a path to the sound file
     for my $data ($dom->find('span[class="l-article__sound"]')->each) {
-        for my $jplayer ($data->find('span[class="jp-jplayer"]')) {
+        for my $jplayer ($data->find('span[class="jp-jplayer"]')->each) {
             my $link = $jplayer->attr('data-flash-url');
             if ($link =~ m/FileName=([^'&]+)/i) {
                 my $fname = decode_base64($1);
@@ -97,12 +97,21 @@ while (my ($id, $keyword, $article, $source, $target, $dictionary, $version, $al
                 die "ERROR: wrong sound link for `$keyword` ($link)\n";
             }
         }
-        $data->find('span[class="js-lingvo-sound jp-audio"]')->remove;
+        for my $audio ($data->find('span[class="js-lingvo-sound jp-audio"]')->each) {
+            $audio->remove;
+        }
     }
     # clean the dictionary info link
     for my $data ($dom->find('a[class="g-iblock l-article__linkdict js-dictionary-popup-trigger"]')->each) {
         my $dict_name = $data->text;
         $data->replace('<span class="g-iblock l-article__linkdict">'.$dict_name.'</span>');
+    }
+    # replase dictionary name
+    for my $data ($dom->find('span[class="l-article__navpanel js-article-parent"]')->each) {
+        my $name = $data->to_string;
+        $data->remove;
+        $dom->child_nodes->first->prepend($name);
+        last;
     }
     
     my $html = $dom->to_string;
